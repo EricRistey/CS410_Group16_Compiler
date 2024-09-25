@@ -38,21 +38,32 @@ public class scanner {
 
             //read character from input stream
             inp = input.charAt(i) - '0';
+            System.out.println("Current Input: "+inp);
 
-            //while (inp >= 0 && inp < INPUTS){
-                //state = fam[state][inp];
-                //inp = input.charAt(i) - '0';
-            //}
+            while (inp >= 0 && inp < i){
+                state = state_table[state][inp];
+                System.out.println("Current State: "+state);
+                inp = input.charAt(i) - '0';
+                System.out.println("Next Input: "+inp);
+            }
 
-            if(state == -1 || inp == -1){
+            //Ensure final state is
+            if(state == -1){
                 System.out.println("Invalid input stream");
                 return;
             }
 
+            //Store Final state
             states[i] = state;
 
-            //state = fam[state][inp];
+            //reset state
+            state = 0;
         }
 
+        //print final states
+        System.out.println("Final States:");
+        for(int i = 0; i < input.length(); i++){
+            System.out.println(states[i]);
+        }
     };
 };
