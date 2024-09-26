@@ -10,9 +10,7 @@ import java.util.Scanner;
  * 
  * To Note: Will we need to implement?
  *  This program does not account for 
- *  integer numbers(ex. 10 read as an IDENTIFIER)
- *  floating point numbers (ex. 12.5 read as INVALID)
- *  comments (i.e. // read as INVALID)
+ *  ex. 10s (reads identifier, does it need to be invalid?)
  * 
  ************************************************************/
 public class Scan {
@@ -28,7 +26,7 @@ public class Scan {
         String[] accepting_states = info.acceptingStates_string;
 
         //initial state
-        int state = 1;
+        int state = 0;
 
         //Gather input from user
         System.out.println("Enter input stream: ");
@@ -46,27 +44,22 @@ public class Scan {
         
         for(int i = 0; i < input.length() ; i++){
             StringBuilder token = new StringBuilder();
-            while(i<input.length() && state != -1){
-                //read character from input stream
-                inp = input.charAt(i) - ' ';
+            //read character from input stream
+            while(i<input.length() && (inp=input.charAt(i) - ' ') > 0){
                 token.append(input.charAt(i));
                 state = state_table[state][inp];
                 i++;
             }
             
             states_string[j] = token.toString();
+            System.out.println("\nState: " + state);
+ 
+            //Store Final state
+            states[j++] = state-1;
 
-            //Ensure final state is
-            if(state == -1){
-                states[j++] = 0;
-            }
-            else{
-                //Store Final state
-                states[j++] = state;
-            }
 
             //reset state
-            state = 1;
+            state = 0;
         }
 
         //print final states
