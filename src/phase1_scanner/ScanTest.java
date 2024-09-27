@@ -157,6 +157,56 @@ public class ScanTest {
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: EXCLAMATION_STATE"));
     }
-    
+
+    @Test
+    public void testForStatement(){
+        //must have spaces
+        simulateInput("for ( int i = 0 ; i < 10 ; i = 1 + i ) { }");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: FOR_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: INT_TYPE"));
+        assertTrue(outContent.toString().contains("State: I_STATE"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: I_STATE"));
+        assertTrue(outContent.toString().contains("State: LT_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: I_STATE"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: ADD_OP"));
+        assertTrue(outContent.toString().contains("State: I_STATE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+    }
+
+    @Test
+    public void testVariableAssign1(){
+        //only works with a space between 10 and ;
+        simulateInput("int x = 10 ;");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: INT_TYPE"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+
+    }
+
+    @Test
+    public void testVariableAssign2(){
+        simulateInput("float i = 10.5 ;");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: FLOAT_TYPE"));
+        assertTrue(outContent.toString().contains("State: I_STATE"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: FLOAT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+
+    }
 
 }
