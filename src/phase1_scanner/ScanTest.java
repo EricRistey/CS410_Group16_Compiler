@@ -206,7 +206,82 @@ public class ScanTest {
         assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
         assertTrue(outContent.toString().contains("State: FLOAT_LIT"));
         assertTrue(outContent.toString().contains("State: SEMICOLON"));
+    }
 
+    @Test
+    public void testForStatement2(){
+        //must have spaces
+        simulateInput("for ( int j = 0 ; j < 10 ; j = 1 + j ) { }");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: FOR_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: INT_TYPE"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: LT_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: ADD_OP"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+    }
+
+    @Test
+    public void testIfStatement(){
+        simulateInput("if ( x < 10 ) { }");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: IF_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: LT_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+    }
+
+    @Test
+    public void testComparison(){
+        simulateInput("10 <= 20");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: LT_ET_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+    }
+
+    @Test
+    public void testComparison2(){
+        simulateInput("10 >= 20");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: GT_ET_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+    }
+
+    @Test
+    public void testComparison3(){
+        simulateInput("10 == 20");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: EQUALS_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+    }
+
+    @Test
+    public void testComparison4(){
+        simulateInput("10 != 20");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: NOT_EQUAL_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
     }
 
 }
