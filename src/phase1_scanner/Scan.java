@@ -3,7 +3,11 @@ import java.util.Scanner;
 
 /*************************************************************
  * Group 16 - Scanner
- * Members: Andrew DeGarmo, 
+ * 
+ * Authors: 
+ *      Scan.java: Andrew DeGarmo, Luke Hare
+ *      StateTable.java: Andrew Degarmo, Luke Hare
+ *      ScanTest.java (Junit tests for different inputs): Eric Ristey, Quinn McAuliffe, Greyson Meares
  * 
  * CS410 - Compiler Construction
  * 9/24/2024

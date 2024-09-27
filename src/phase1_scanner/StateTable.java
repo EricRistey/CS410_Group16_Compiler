@@ -1,3 +1,14 @@
+/*************************************************************
+ * Group 16 - StateTable
+ * 
+ * Authors: 
+ *      Scan.java: Andrew DeGarmo, Luke Hare
+ *      StateTable.java: Andrew Degarmo, Luke Hare
+ *      ScanTest.java (Junit tests for different inputs): Eric Ristey, Quinn McAuliffe, Greyson Meares
+ * 
+ * CS410 - Compiler Construction
+ * 9/27/2024
+ ************************************************************/
 package phase1_scanner;
 
 public class StateTable {
