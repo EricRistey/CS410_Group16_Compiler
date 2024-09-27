@@ -8,13 +8,15 @@ import java.util.Scanner;
  *      Scan.java: Andrew DeGarmo, Luke Hare
  *      StateTable.java: Andrew Degarmo, Luke Hare
  *      ScanTest.java (Junit tests for different inputs): Eric Ristey, Quinn McAuliffe, Greyson Meares
+ * Reviewers: 
+ *      Michael Ames
  * 
  * CS410 - Compiler Construction
  * 9/24/2024
  * 
- * To Note: Will we need to implement?
- *  This program does not account for 
- *  ex. 10s (reads identifier, does it need to be invalid?)
+ * To Note: 
+ *    - Spaces are needed in between each token to identify the token
+ *    - States F, FL, FLO, FLOA, I, IN, W, WH, WHI, WHIL, E, EL, ELS, ELSEI are assumed to be IDENTIFIERS
  * 
  ************************************************************/
 public class Scan {
@@ -36,6 +38,7 @@ public class Scan {
         System.out.println("Enter input stream: ");
         Scanner scan = new Scanner(System.in);
         String input = scan.nextLine();
+        scan.close();
 
         //States list will contain all final states that the state machine reaches
         int states[] = new int[100];
