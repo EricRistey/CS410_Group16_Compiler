@@ -161,7 +161,7 @@ public class ScanTest {
     @Test
     public void testForStatement(){
         //must have spaces
-        simulateInput("for ( int i = 0 ; i < 10 ; i = 1 + i ) { }");
+        simulateInput("for (int i = 0; i < 10; i = 1 + i) {}");
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: FOR_COND"));
         assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
@@ -187,7 +187,7 @@ public class ScanTest {
     @Test
     public void testVariableAssign1(){
         //only works with a space between 10 and ;
-        simulateInput("int x = 10 ;");
+        simulateInput("int x = 10;");
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: INT_TYPE"));
         assertTrue(outContent.toString().contains("State: IDENTIFIER"));
@@ -199,7 +199,7 @@ public class ScanTest {
 
     @Test
     public void testVariableAssign2(){
-        simulateInput("float i = 10.5 ;");
+        simulateInput("float i = 10.5;");
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: FLOAT_TYPE"));
         assertTrue(outContent.toString().contains("State: I_STATE"));
@@ -211,7 +211,7 @@ public class ScanTest {
     @Test
     public void testForStatement2(){
         //must have spaces
-        simulateInput("for ( int j = 0 ; j < 10 ; j = 1 + j ) { }");
+        simulateInput("for (int j = 0; j < 10; j = 1+j) {}");
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: FOR_COND"));
         assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
@@ -236,7 +236,7 @@ public class ScanTest {
 
     @Test
     public void testIfStatement(){
-        simulateInput("if ( x < 10 ) { }");
+        simulateInput("if (x < 10) {}");
         scanner.main(new String[0]);
         assertTrue(outContent.toString().contains("State: IF_COND"));
         assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
@@ -282,6 +282,20 @@ public class ScanTest {
         assertTrue(outContent.toString().contains("State: INT_LIT"));
         assertTrue(outContent.toString().contains("State: NOT_EQUAL_OP"));
         assertTrue(outContent.toString().contains("State: INT_LIT"));
+    }
+
+    @Test
+    public void testWhileCond(){
+        simulateInput("while (x < 10) {}");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: WHILE_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: LT_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
     }
 
 }
