@@ -74,6 +74,14 @@ public class Scan {
                 }
             }
             
+            //If a character is not covered by the transition table
+            if(token.length() == 0){
+
+                //i+1 is necessary to counteract the i-- before it got here
+                System.out.println(input.charAt(i+1) + " is not a valid character.");
+                System.exit(-1);
+            }
+
             states_string[j] = token.toString();
             System.out.println("\nState: " + prevState);
  
