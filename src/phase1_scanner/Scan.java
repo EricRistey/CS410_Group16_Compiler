@@ -49,20 +49,36 @@ public class Scan {
 
         int j = 0;
         
+        //Previous state
+        int prevState = 0;
+
         for(int i = 0; i < input.length() ; i++){
             StringBuilder token = new StringBuilder();
             //read character from input stream
             while(i<input.length() && (inp=input.charAt(i) - ' ') > 0){
-                token.append(input.charAt(i));
                 state = state_table[state][inp];
-                i++;
+
+                //If state == invalid transition or space
+                if(state == info.INVALID || state == -1){
+
+                    //Decrement i once so for loop won't skip the current character when traversing again
+                    i--;
+                    break;
+                }
+                else{
+
+                    //Saving current state into prevState so we can still access the final state if we hit an invalid transition or space
+                    prevState = state;
+                    token.append(input.charAt(i));
+                    i++;
+                }
             }
             
             states_string[j] = token.toString();
-            System.out.println("\nState: " + state);
+            System.out.println("\nState: " + prevState);
  
             //Store Final state
-            states[j++] = state-1;
+            states[j++] = prevState;
 
 
             //reset state
