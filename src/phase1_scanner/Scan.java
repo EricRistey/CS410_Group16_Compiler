@@ -58,6 +58,14 @@ public class Scan {
             StringBuilder token = new StringBuilder();
             //Read character from input stream
             while(i<input.length() && (inp=input.charAt(i) - ' ') > 0){
+
+                //Check if character is within our ASCII range (1-126)
+                if(inp > 126 || inp < 1){
+                    state = info.INVALID;
+                    print_states(states, accepting_states, states_string);
+                    System.out.println(input.charAt(i) + " is not a valid character.");
+                    System.exit(-1);
+                }
                 state = state_table[state][inp];
 
                 //If state == invalid transition or space
