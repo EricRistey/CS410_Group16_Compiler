@@ -59,7 +59,7 @@ public class Scan {
                 state = state_table[state][inp];
 
                 //If state == invalid transition or space
-                if(state == info.INVALID || state == -1){
+                if(state == info.INVALID){
 
                     //Decrement i once so for loop won't skip the current character when traversing again
                     i--;
@@ -75,15 +75,19 @@ public class Scan {
             }
             
             //If a character is not covered by the transition table
-            if(token.length() == 0){
-
+            if(state == info.INVALID && token.length() == 0){
                 //i+1 is necessary to counteract the i-- before it got here
+                //print final states
+                print_states(states, accepting_states, states_string);
                 System.out.println(input.charAt(i+1) + " is not a valid character.");
                 System.exit(-1);
             }
+            else if(token.length() == 0) {
+                state = 0;
+                continue;
+            }
 
             states_string[j] = token.toString();
-            System.out.println("\nState: " + prevState);
  
             //Store Final state
             states[j++] = prevState;
