@@ -298,4 +298,39 @@ public class ScanTest {
         assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
     }
 
+    @Test
+    public void whileCond2(){
+        simulateInput("while (x    < 10) {if  (x >= 9)  {x = 1;} else {x = x  + 1;} }");
+        scanner.main(new String[0]);
+        assertTrue(outContent.toString().contains("State: WHILE_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: LT_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: IF_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_PARAN"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: GT_ET_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: CLOSE_PARAN"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+        assertTrue(outContent.toString().contains("State: ELSE_COND"));
+        assertTrue(outContent.toString().contains("State: OPEN_BRACE"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ASSIGN_OP"));
+        assertTrue(outContent.toString().contains("State: IDENTIFIER"));
+        assertTrue(outContent.toString().contains("State: ADD_OP"));
+        assertTrue(outContent.toString().contains("State: INT_LIT"));
+        assertTrue(outContent.toString().contains("State: SEMICOLON"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+        assertTrue(outContent.toString().contains("State: CLOSE_BRACE"));
+    }
+
 }

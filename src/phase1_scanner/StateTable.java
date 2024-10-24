@@ -12,7 +12,6 @@
  * 9/27/2024
  * 
  * To Note: 
- *    - Spaces are needed in between each token to identify the token
  *    - States F, FL, FLO, FLOA, I, IN, W, WH, WHI, WHIL, E, EL, ELS, ELSEI are assumed to be IDENTIFIERS
  ************************************************************/
 package phase1_scanner;
