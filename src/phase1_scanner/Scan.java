@@ -1,4 +1,5 @@
 package phase1_scanner;
+import phase2_parser.Package;
 import java.util.Scanner;
 
 /*************************************************************
@@ -107,8 +108,13 @@ public class Scan {
             state = 0;
         }
 
+
+
         //print final states
         print_states(states, accepting_states, states_string);
+
+        //PARSER
+        Parser parser = new Parser();
     };
 
     // Method to print final states
