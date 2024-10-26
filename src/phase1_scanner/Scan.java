@@ -1,5 +1,4 @@
 package phase1_scanner;
-import phase2_parser.Package;
 import java.util.Scanner;
 
 /*************************************************************
@@ -110,18 +109,17 @@ public class Scan {
 
 
 
-        //print final states
+        //print final statesif 
         print_states(states, accepting_states, states_string);
 
-        //PARSER
-        Parser parser = new Parser();
     };
 
     // Method to print final states
     static void print_states(int[] states, String[] accepting_states, String[] states_string){
         System.out.println("\nFinal States: ");
         for(int i = 0; states[i] != 0 || states_string[i] != null; i++){
-            System.out.println("State: " + accepting_states[states[i]] + " | " + "Input: " + states_string[i]);
+            System.out.println("State: " + accepting_states[states[i]] + " | " 
+            + "Input: " + states_string[i] + " | " + "Encoding: " + states[i]);
         }
     }
 };

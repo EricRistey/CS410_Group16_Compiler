@@ -1,15 +1,34 @@
 package phase2_parser;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Parse{
-    private final int[] terminals;
+    private int[] terminals;
     private int index;
+    private int length;
 
     public Parse(int[] terminals) {
         this.terminals = terminals;
         this.index = 0;
+        this.length = terminals.length;
+    }
+    public Parse() {
+        this.terminals = new int[0];
+        this.index = 0;
+    }
+
+    public void setTerminals(int[] terminals) {
+        this.terminals = terminals;
+        this.index = 0;
+        this.length = terminals.length;
     }
 
     public boolean accept(int terminal) {
+        //If end of input
+        if (index >= length) {
+            return false;
+        }
         //If terminal matches
         if(terminal == terminals[index]) {
             index++;
@@ -20,6 +39,10 @@ public class Parse{
     }
 
     public void expect(int terminal) {
+        //If end of input
+        if (index >= length) {
+            throw new IllegalArgumentException();
+        }
         //If terminal matches
         if(terminal == terminals[index]) {
             index++;
@@ -30,6 +53,10 @@ public class Parse{
     }
 
     public boolean peak(int terminal) {
+        //If end of input
+        if (index >= length) {
+            return false;
+        }
         //If terminal matches
         return (terminal == terminals[index]);
     }
@@ -136,11 +163,17 @@ public class Parse{
 
         //ASSIGNMENT CASE
         //int_type or float_type
-        if(peak(38) || peak(41)){
+        if(peak(37) || peak(38) || peak(39)){
             String result = Assignment();
             return result;//INSERT DECAF
         }
+
+        if (index == length) {
+            return "ACCEPT";
+        }
+
         return "REJECT";
+        
     }
 
     /*
@@ -148,6 +181,26 @@ public class Parse{
      * Assignment → float_type identifier = float_literal;
      */
     public String Assignment() {
+        //reassign case
+        //identifier
+        if(accept(39)){
+            //= 
+            if(accept(30)){
+                //int_literal
+                if(accept(40)){
+                    //;
+                    expect(43);
+                    return "ACCEPT";//INSERT DECAF
+                }
+                //float_literal
+                if(accept(41)){
+                    //;
+                    expect(43);
+                    return "ACCEPT";//INSERT DECAF
+                }
+            }
+        }
+
         //INT CASE
         //int_type
         if(accept(38)){
@@ -159,7 +212,7 @@ public class Parse{
                     if(accept(40)){
                         //;
                         expect(43);
-                        return "";//INSERT DECAF
+                        return "ACCEPT";//INSERT DECAF
                     }
                 }
             }
@@ -167,13 +220,13 @@ public class Parse{
 
         //FLOAT CASE
         //float_type
-        if(accept(41)){
+        if(accept(37)){
             //identifier
             if(accept(39)){
                 //=
                 if(accept(30)){
                     //float_literal
-                    if(accept(40)){
+                    if(accept(41)){
                         //;
                         expect(43);
                         return "ACCEPT";//INSERT DECAF
@@ -207,7 +260,28 @@ public class Parse{
      * Else-if → else if ( Bool ) { Statement  } Else
      */
     public String ElseIf() {
-        return "";
+        //else
+        if(accept(35)){
+            //if
+            if(accept(34)){
+                //(
+                if(accept(18)){
+                    Bool();
+                    //)
+                    if(accept(19)){
+                        //{
+                        if(accept(16)){
+                            Statement();
+                            //}
+                            expect(17);
+
+                            return "ACCEPT";//INSERT DECAF
+                        }
+                    }
+                }
+            }
+        }
+        return "REJECT";
     }
 
     /*
@@ -229,7 +303,34 @@ public class Parse{
      * Expr → ( Expr )
      */
     public String Expr() {
-        return "";
+        //identifier
+        List<Integer> IDENTIFIER_TOKENS = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 39);
+        if(IDENTIFIER_TOKENS.contains(terminals[index])){
+            accept(terminals[index]);
+            return "ACCEPT";//INSERT DECAF
+        }
+        //int_literal
+        if(accept(40)){
+            return "ACCEPT";//INSERT DECAF
+        }
+        //float_literal
+        if(accept(42)){
+            return "ACCEPT";//INSERT DECAF
+        }
+        //*, /, +, -
+        if(accept(44) || accept(45) || accept(46) || accept(47)){
+            Expr();
+            return "ACCEPT";//INSERT DECAF
+        }
+        //(
+        if(accept(18)){
+            Expr();
+            //)
+            if(accept(19)){
+                return "ACCEPT";//INSERT DECAF
+            }
+        }
+        return "REJECT";
     }
 
     /*
@@ -248,5 +349,6 @@ public class Parse{
             Expr();
             return "ACCEPT";//INSERT DECAF
         }
+        return "REJECT";
     }
 }
