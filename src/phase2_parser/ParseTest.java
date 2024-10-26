@@ -91,7 +91,7 @@ public class ParseTest {
 
     @Test
     public void testAssignIntLit() {
-        // IDENT = INT_LIT;
+        // IDENT = FLOAT_LIT;
         int[] terminals = {39, 30, 41, 43};
         parser.setTerminals(terminals);
         assertEquals("ACCEPT", parser.Statement());
@@ -99,8 +99,8 @@ public class ParseTest {
 
     @Test
     public void testAssignExpr() {
-        // IDENT = float_literal * ( INT_LIT + INT_LIT );
-        int[] terminals = {39, 30, 41, 10, 30, 40, 8, 30, 40, 9, 41, 43};
+        //            IDENT = float_literal * ( INT_LIT + INT_LIT );
+        int[] terminals = {39, 30, 41, 22, 18, 40, 20, 40, 19, 43};
         parser.setTerminals(terminals);
         assertEquals("ACCEPT", parser.Statement());
     }

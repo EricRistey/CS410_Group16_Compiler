@@ -72,6 +72,37 @@ public class Parse{
     public String Statement() {
         //IF CASE
         //if
+        if (peak(34)) {
+            If();
+        }
+
+        //FOR CASE
+        //for
+        if (peak(32)) {
+            For();
+        }
+
+        //WHILE CASE
+        //while
+        if(peak(33)){
+            While();
+        }
+        //ASSIGNMENT CASE
+        //int_type or float_type
+        if(peak(37) || peak(38) || peak(39)){
+            String result = Assignment();
+            return result;//INSERT DECAF
+        }
+
+        if (index == length) {
+            return "ACCEPT";
+        }
+
+        return "REJECT";
+        
+    }
+
+    private String If(){
         if(accept(34)){
             //(
             if(accept(18)){
@@ -112,9 +143,31 @@ public class Parse{
                 }
             }
         }
+        return "REJECT";
+    }
 
-        //FOR CASE
-        //for
+    private String While(){
+        if(accept(33)){
+            //(
+            if(accept(18)){
+                Bool();
+                //)
+                if(accept(19)){
+                    //{
+                    if(accept(16)){
+                        Statement();
+                        //}
+                        expect(17);
+                        //ACCEPT
+                        return "ACCEPT";//INSERT DECAF
+                    }
+                }
+            }
+        }
+        return "REJECT";
+    }
+
+    private String For(){
         if(accept(32)){
             //(
             if(accept(18)){
@@ -140,40 +193,7 @@ public class Parse{
                 }    
             }
         }
-
-        //WHILE CASE
-        //while
-        if(accept(33)){
-            //(
-            if(accept(18)){
-                Bool();
-                //)
-                if(accept(19)){
-                    //{
-                    if(accept(16)){
-                        Statement();
-                        //}
-                        expect(17);
-                        //ACCEPT
-                        return "ACCEPT";//INSERT DECAF
-                    }
-                }
-            }
-        }
-
-        //ASSIGNMENT CASE
-        //int_type or float_type
-        if(peak(37) || peak(38) || peak(39)){
-            String result = Assignment();
-            return result;//INSERT DECAF
-        }
-
-        if (index == length) {
-            return "ACCEPT";
-        }
-
         return "REJECT";
-        
     }
 
     /*
@@ -186,17 +206,12 @@ public class Parse{
         if(accept(39)){
             //= 
             if(accept(30)){
-                //int_literal
-                if(accept(40)){
+                //expr
+                if (Expr().equals("ACCEPT")) {
+
                     //;
                     expect(43);
-                    return "ACCEPT";//INSERT DECAF
-                }
-                //float_literal
-                if(accept(41)){
-                    //;
-                    expect(43);
-                    return "ACCEPT";//INSERT DECAF
+                    return "ACCEPT";
                 }
             }
         }
@@ -208,11 +223,11 @@ public class Parse{
             if(accept(39)){
                 //=
                 if(accept(30)){
-                    //int_literal
-                    if(accept(40)){
+                    //expression
+                    if (Expr().equals("ACCEPT")) {
                         //;
                         expect(43);
-                        return "ACCEPT";//INSERT DECAF
+                        return "ACCEPT";
                     }
                 }
             }
@@ -225,12 +240,10 @@ public class Parse{
             if(accept(39)){
                 //=
                 if(accept(30)){
-                    //float_literal
-                    if(accept(41)){
-                        //;
-                        expect(43);
-                        return "ACCEPT";//INSERT DECAF
-                    }
+                    //expression
+                    Expr();
+                    //;
+                    expect(43);
                 }
             }
         }
@@ -305,20 +318,30 @@ public class Parse{
     public String Expr() {
         //identifier
         List<Integer> IDENTIFIER_TOKENS = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 39);
+        List<Integer> OPERATOR_TOKENS = Arrays.asList(20, 21, 22, 23);
         if(IDENTIFIER_TOKENS.contains(terminals[index])){
             accept(terminals[index]);
             return "ACCEPT";//INSERT DECAF
         }
         //int_literal
         if(accept(40)){
+            if (OPERATOR_TOKENS.contains(terminals[index])) {       //peek for operator. if there is an operator, then there is another expression
+                Expr();
+                return "ACCEPT";//INSERT DECAF
+            }
             return "ACCEPT";//INSERT DECAF
+
         }
         //float_literal
-        if(accept(42)){
+        if(accept(41)){
+            if (OPERATOR_TOKENS.contains(terminals[index])) {       //peek for operator. if there is an operator, then there is another expression
+                Expr();
+                return "ACCEPT";//INSERT DECAF
+            }
             return "ACCEPT";//INSERT DECAF
         }
         //*, /, +, -
-        if(accept(44) || accept(45) || accept(46) || accept(47)){
+        if(accept(20) || accept(21) || accept(22) || accept(23)){
             Expr();
             return "ACCEPT";//INSERT DECAF
         }
