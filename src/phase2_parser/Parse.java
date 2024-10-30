@@ -271,6 +271,8 @@ public class Parse{
         }
         else{
             expect(30);//=
+            if(isOperator(index))    //check for operator after = (no number/identifer to operate)
+            return "REJECT";
             //expr
             if (Expr().equals("ACCEPT")) {
                 return "ACCEPT";
@@ -316,8 +318,7 @@ public class Parse{
         //int_literal
         if(accept(40)){
             if (isOperator(index)) {       //peek for operator. if there is an operator, then there is another expression
-                Expr();
-                return "ACCEPT";//INSERT DECAF
+                return Expr();
             }
             return "ACCEPT";//INSERT DECAF
 
@@ -325,8 +326,7 @@ public class Parse{
         //float_literal
         if(accept(41)){
             if (isOperator(index)) {       //peek for operator. if there is an operator, then there is another expression
-                Expr();
-                return "ACCEPT";//INSERT DECAF
+                return Expr();
             }
             return "ACCEPT";//INSERT DECAF
         }
