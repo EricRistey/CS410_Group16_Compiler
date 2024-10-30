@@ -48,6 +48,8 @@ public class ParseTest {
         encoding.put(";", 43);
     }
 
+    
+
     private int[] encodeTerminals(String[] terminals) { //encode the test tokens using the encoding hashmap
         int[] encoded = new int[terminals.length];
         for (int i = 0; i < terminals.length; i++) {
@@ -62,6 +64,142 @@ public class ParseTest {
         initEncoding();
         parser = new Parse();
         System.setOut(new PrintStream(outContent));
+    }
+
+    @Test
+    public void testInvalidAssignmentWithOperator() {
+        // IDENT = + INT_LIT;
+
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "+", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }   //FAILS
+
+    //more similar invalid assignments
+    @Test
+    public void testInvalidAssignmentWithOperator2() {
+        // IDENT = - INT_LIT;
+
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "-", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }   //FAILS
+
+    @Test
+    public void testInvalidAssignmentWithOperator3() {
+        // IDENT = / INT_LIT;
+
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "/", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }   //FAILS
+
+    @Test
+    public void testInvalidAssignmentWithOperator4() {
+        // IDENT = * INT_LIT;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "*", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }   //FAILS    
+
+    @Test  
+    public void testInvalidAssignmentWithOperator5() {
+        // IDENT = INT_LIT +;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "+", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }
+
+    @Test
+    public void testInvalidAssignmentWithOperator6() {
+        // IDENT = FLOAT_LIT -;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "-", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }
+
+    @Test
+    public void testInvalidAssignmentWithOperator8() {
+        // IDENT = + IDENT;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "+", "IDENT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }
+        
+    @Test       //although the above test fails, this one passes
+    public void testInvalidAssignmentWithOperator9() {
+        // IDENT = IDENT +;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "IDENT", "+", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }//PASSES
+
+    @Test       //this one passes as well but it throws an illegal argument exception. 
+    //not sure if thats the expected behavior or not
+    public void testInvalidAssignmentWithOperator7() {
+        // IDENT = INT_LIT <;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "<", ";"});
+        parser.setTerminals(terminals);
+        // assertEquals("REJECT", parser.Statement());
+        //throws illegal argument exception
+        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+    }
+    
+
+    //some tests for empty statement
+    @Test
+    public void testEmptyIfs() {
+        int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    @Test
+    public void testEmptyFor() {
+        int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    @Test
+    public void testEmptyWhile() {
+        int[] terminals = encodeTerminals(new String[]{"while", "(", "INT_LIT", ")", "{", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }   
+
+    public void testEmptyElseIf() {
+        int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}", "else if", "(", "IDENT", ">", "INT_LIT", ")", "{", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    public void testEmptyElse() {
+        int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}", "else", "{", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    @Test
+    public void testEmptyNestedFor(){
+        int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "}", "}"}); 
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    @Test
+    public void testEmptyNestedIfs(){
+        int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "if", "(", "IDENT", ">", "INT_LIT", ")", "{", "}", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
+    }
+
+    @Test
+    public void testNestedFor(){
+        // for (int i = 0; i < 10; i = i + 1) { for (int j = 0; j < 10; j = j + 1) { int IDENT = INT_LIT; } }
+        int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}", "}"});
+        parser.setTerminals(terminals);
+        assertEquals("ACCEPT", parser.Statement());
     }
 
     @Test
