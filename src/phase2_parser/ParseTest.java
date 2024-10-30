@@ -136,7 +136,7 @@ public class ParseTest {
 
     @Test       //this one passes as well but it throws an illegal argument exception. 
     //not sure if thats the expected behavior or not
-    public void testInvalidAssignmentWithOperator7() {
+    public void testInvalidAssignmentWithComparison() {
         // IDENT = INT_LIT <;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "<", ";"});
         parser.setTerminals(terminals);
@@ -144,6 +144,33 @@ public class ParseTest {
         //throws illegal argument exception
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
+
+    @Test
+    public void testInvalidAssignmentWithComparison2() {
+        // IDENT = >INT_LIT;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", ">", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }
+    
+    @Test
+    public void testInvalidAssignmentWithComparison3() {
+        // IDENT = INT_LIT ==;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "==", ";"});
+        parser.setTerminals(terminals);
+        // assertEquals("REJECT", parser.Statement());
+        //throws illegal argument exception
+        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+    }
+
+    @Test
+    public void testInvalidAssignmentWithComparison4() {
+        // IDENT = != INT_LIT;
+        int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "!=", "INT_LIT", ";"});
+        parser.setTerminals(terminals);
+        assertEquals("REJECT", parser.Statement());
+    }
+
     
 
     //some tests for empty statement
