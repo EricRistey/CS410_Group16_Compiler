@@ -5,6 +5,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
+/*************************************************************
+ * Group 16 - Parser
+ * 
+ * Authors: 
+ *      Parse.java: Andrew DeGarmo, Greyson Meares, Michael Ames
+ *      ParseTest.java (Junit tests for different inputs): Greyson Meares
+ * Reviewers: 
+ *      Luke Hare, Quinn McAuliffe, Eric Ristey
+ * 
+ * CS410 - Compiler Construction
+ * 10/31/2024
+ * 
+ * Functionality:
+ *      interprets int array of terminals & string array of tokens from Scanner
+ *      and builds a list of decaf instructions accordingly
+ * 
+ ************************************************************/
+
 public class Parse{
     private int[] terminals;
     private String[] tokens;
@@ -359,7 +377,7 @@ public class Parse{
             if (result.equals("REJECT")) {
                 return "REJECT";
             }
-            
+
             expect(43);
         }
         if (index >= length) {
