@@ -71,7 +71,8 @@ public class ParseTest {
         // IDENT = + INT_LIT;
 
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "+", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String [] tokens = new String[]{"test", "=", "+", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }   //FAILS
 
@@ -81,7 +82,8 @@ public class ParseTest {
         // IDENT = - INT_LIT;
 
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "-", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "-", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }   //FAILS
 
@@ -90,7 +92,8 @@ public class ParseTest {
         // IDENT = / INT_LIT;
 
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "/", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "/", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }   //FAILS
 
@@ -98,7 +101,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithOperator4() {
         // IDENT = * INT_LIT;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "*", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "*", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }   //FAILS    
 
@@ -106,7 +110,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithOperator5() {
         // IDENT = INT_LIT +;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "+", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10", "+", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -114,7 +119,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithOperator6() {
         // IDENT = FLOAT_LIT -;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "-", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10", "-", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -122,7 +128,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithOperator8() {
         // IDENT = + IDENT;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "+", "IDENT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "+", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
         
@@ -130,7 +137,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithOperator9() {
         // IDENT = IDENT +;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "IDENT", "+", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10", "+", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }//PASSES
 
@@ -139,7 +147,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithComparison() {
         // IDENT = INT_LIT <;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "<", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10", "<", ";"};
+        parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         //throws illegal argument exception
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
@@ -149,7 +158,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithComparison2() {
         // IDENT = >INT_LIT;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", ">", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", ">", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
     
@@ -157,7 +167,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithComparison3() {
         // IDENT = INT_LIT ==;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "INT_LIT", "==", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10", "==", ";"};
+        parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         //throws illegal argument exception
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
@@ -167,7 +178,8 @@ public class ParseTest {
     public void testInvalidAssignmentWithComparison4() {
         // IDENT = != INT_LIT;
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "!=", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "!=", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -177,47 +189,54 @@ public class ParseTest {
     @Test
     public void testEmptyIfs() {
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
     @Test
     public void testEmptyFor() {
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
     @Test
     public void testEmptyWhile() {
         int[] terminals = encodeTerminals(new String[]{"while", "(", "INT_LIT", ")", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"while", "(", "10", ")", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }   
 
     public void testEmptyElseIf() {
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}", "else if", "(", "IDENT", ">", "INT_LIT", ")", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}", "else if", "(", "test", ">", "10", ")", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
     public void testEmptyElse() {
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}", "else", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}", "else", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
     @Test
     public void testEmptyNestedFor(){
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "}", "}"}); 
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "}", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
     @Test
     public void testEmptyNestedIfs(){
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "if", "(", "IDENT", ">", "INT_LIT", ")", "{", "}", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "}", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -225,7 +244,8 @@ public class ParseTest {
     public void testNestedFor(){
         // for (int i = 0; i < 10; i = i + 1) { for (int j = 0; j < 10; j = j + 1) { int IDENT = INT_LIT; } }
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "test", ";", "test", "=", "test", "+", "10", ")", "{", "for", "(", "int", "test", "=", "10", ";", "test", "<", "test", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -233,8 +253,8 @@ public class ParseTest {
     public void testIfStatement() {
         // if ( i < 10 ) { int IDENT = INT_LIT; }
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -243,7 +263,8 @@ public class ParseTest {
         // if ( i < 10 ) { int IDENT = INT_LIT; } else { float IDENT = FLOAT_LIT; }
         // int[] terminals = {34, 18, 6, 26, 40, 19, 16, 38, 39, 30, 40, 43, 17, 35, 16, 37, 39, 30, 41, 43, 17};
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}", "else", "{", "float", "IDENT", "=", "FLOAT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";", "}", "else", "{", "float", "test", "=", "10.0", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -251,7 +272,8 @@ public class ParseTest {
     public void testValidBooleanExpression() {
         // if ( ( INT_LIT * INT_LIT ) <= ( IDENT + FLOAT_LIT ) ) { IDENT = INT_LIT; }
         int[] terminals = encodeTerminals(new String[]{"if", "(", "(", "INT_LIT", "*", "INT_LIT",  ")", "<=", "(", "IDENT", "+", "FLOAT_LIT", ")",  ")", "{", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "(", "10", "*", "10", ")", "<=", "(", "test", "+", "10.0", ")", ")", "{", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -259,7 +281,8 @@ public class ParseTest {
     public void testValidComplexExpression() {
         // IDENT = ( IDENT + INT_LIT ) * ( IDENT - INT_LIT );
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "(", "IDENT", "+", "INT_LIT", ")", "*", "(", "IDENT", "-", "INT_LIT", ")", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "(", "test", "+", "10", ")", "*", "(", "test", "-", "10", ")", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -267,7 +290,8 @@ public class ParseTest {
     public void testValidNestedIf() {
         // if ( IDENT < INT_LIT ) { if ( IDENT > INT_LIT ) { IDENT = INT_LIT; } }
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "if", "(", "IDENT", ">", "INT_LIT", ")", "{", "IDENT", "=", "INT_LIT", ";", "}", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "test", "=", "10", ";", "}", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -275,7 +299,8 @@ public class ParseTest {
     public void testValidElseIf() {
         // if ( IDENT < INT_LIT ) { IDENT = INT_LIT; } else if ( IDENT > FLOAT_LIT ) { IDENT = FLOAT_LIT; } else { IDENT = INT_LIT; }
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "IDENT", "=", "INT_LIT", ";", "}", "else if", "(", "IDENT", ">", "FLOAT_LIT", ")", "{", "IDENT", "=", "FLOAT_LIT", ";", "}", "else", "{", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "test", "=", "10", ";", "}", "else if", "(", "test", ">", "10.0", ")", "{", "test", "=", "10.0", ";", "}", "else", "{", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -284,7 +309,8 @@ public class ParseTest {
         // INT IDENT = INT_LIT;
         // int[] terminals = {38, 39, 30, 40, 43};
         int[] terminals = encodeTerminals(new String[]{"int", "IDENT", "=", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"int", "test", "=", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -293,7 +319,8 @@ public class ParseTest {
         // IDENT = FLOAT_LIT;
         // int[] terminals = {39, 30, 41, 43};
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "FLOAT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10.0", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -302,7 +329,8 @@ public class ParseTest {
         //            IDENT = float_literal * ( INT_LIT + INT_LIT );
         // int[] terminals = {39, 30, 41, 22, 18, 40, 20, 40, 19, 43};
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "FLOAT_LIT", "*", "(", "INT_LIT", "+", "INT_LIT", ")", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "10.0", "*", "(", "10", "+", "10", ")", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -312,7 +340,8 @@ public class ParseTest {
         // int[] terminals = {32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";",
          "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -320,7 +349,8 @@ public class ParseTest {
     public void testWhileStatement() {
         // int[] terminals = {33, 18, 40, 19, 16, 38, 39, 30, 40, 43, 17};
         int[] terminals = encodeTerminals(new String[]{"while", "(", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"while", "(", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
 
@@ -330,7 +360,8 @@ public class ParseTest {
         // if ( i < 10 ) { int IDENT = INT_LIT; } else { float IDENT = FLOAT_LIT;
         // int[] terminals = {34, 18, 6, 26, 40, 19, 16, 38, 39, 30, 40, 43}; // Missing closing brace
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";"}); // Missing closing brace
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
 
@@ -339,7 +370,8 @@ public class ParseTest {
         // if ( i < 10 { int IDENT = INT_LIT; }
         // Missing closing parenthesis
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
 
@@ -348,7 +380,8 @@ public class ParseTest {
         // if (Ident < 10) { } else {} else if (Ident > 10) { }
         // else if statement without an if-else block
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "}", "else", "{", "}", "else if", "(", "IDENT", ">", "INT_LIT", ")", "{", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}", "else", "{", "}", "else if", "(", "test", ">", "10", ")", "{", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -357,7 +390,8 @@ public class ParseTest {
         // for ( int i = 0; i < 10; i = i + 1 { int IDENT = INT_LIT; }
         // Missing closing parenthesis
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
 
@@ -366,7 +400,8 @@ public class ParseTest {
         // while ( INT_LIT { int IDENT = INT_LIT; }
         // Missing closing parenthesis
         int[] terminals = encodeTerminals(new String[]{"while", "(", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"while", "(", "10", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
 
@@ -375,7 +410,8 @@ public class ParseTest {
         // int IDENT = ;
         // Missing literal
         int[] terminals = encodeTerminals(new String[]{"int", "IDENT", "=", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"int", "test", "=", ";"};
+        parser.setTerminals(terminals, tokens);
         //expect reject
         assertEquals("REJECT", parser.Statement());
     }
@@ -385,7 +421,8 @@ public class ParseTest {
         // IDENT = IDENT + ;
         // Missing second operand
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "IDENT", "+", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "test", "+", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -394,7 +431,8 @@ public class ParseTest {
         // if ( IDENT == ) { int IDENT = INT_LIT; }
         // Missing second operand in boolean expression
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "==", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "==", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -403,7 +441,8 @@ public class ParseTest {
         // if ( IDENT < INT_LIT ) { int IDENT = INT_LIT; } else if ( IDENT > ) { int IDENT = INT_LIT; }
         // Missing second operand in else-if condition
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}", "else if", "(", "IDENT", ">", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";", "}", "else if", "(", "test", ">", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -412,7 +451,8 @@ public class ParseTest {
         // int IDENT = INT_LIT
         // Missing semicolon
         int[] terminals = encodeTerminals(new String[]{"int", "IDENT", "=", "INT_LIT"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"int", "test", "=", "10"};
+        parser.setTerminals(terminals, tokens);
         //illegal argument exception
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
@@ -422,7 +462,8 @@ public class ParseTest {
         // { int IDENT = INT_LIT;
         // Missing closing brace
         int[] terminals = encodeTerminals(new String[]{"{", "int", "IDENT", "=", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -431,7 +472,8 @@ public class ParseTest {
         // if ( IDENT < INT_LIT ) { if ( IDENT > INT_LIT ) { int IDENT = INT_LIT; }
         // Missing closing braces for nested if
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "if", "(", "IDENT", ">", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         //illegal argument exception
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
@@ -441,7 +483,8 @@ public class ParseTest {
         // while { int IDENT = INT_LIT; }
         // Missing condition in while loop
         int[] terminals = encodeTerminals(new String[]{"while", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"while", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
@@ -451,7 +494,8 @@ public class ParseTest {
         // for ( ; i < 10; i = i + 1 ) { int IDENT = INT_LIT; }
         // Missing initialization in for loop
         int[] terminals = encodeTerminals(new String[]{"for", "(", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
@@ -461,7 +505,8 @@ public class ParseTest {
         // for ( int i = 0; i < 10; ) { int IDENT = INT_LIT; }
         // Missing update in for loop
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         assertThrows(IllegalArgumentException.class, () -> parser.Statement());
     }
@@ -471,7 +516,8 @@ public class ParseTest {
         // IDENT = IDENT + * INT_LIT;
         // Invalid expression with consecutive operators
         int[] terminals = encodeTerminals(new String[]{"IDENT", "=", "IDENT", "+", "*", "INT_LIT", ";"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"test", "=", "test", "+", "*", "10", ";"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 
@@ -480,7 +526,8 @@ public class ParseTest {
         // if () { int IDENT = INT_LIT; }
         // Empty condition in if statement
         int[] terminals = encodeTerminals(new String[]{"if", "(", ")", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
-        parser.setTerminals(terminals);
+        String[] tokens = new String[]{"if", "(", ")", "{", "int", "test", "=", "10", ";", "}"};
+        parser.setTerminals(terminals, tokens);
         assertEquals("REJECT", parser.Statement());
     }
 }
