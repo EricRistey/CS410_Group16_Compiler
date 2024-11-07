@@ -1,5 +1,6 @@
 package phase1_scanner;
 import java.util.Scanner;
+import phase2_parser.Parse;
 
 /*************************************************************
  * Group 16 - Scanner
@@ -112,6 +113,10 @@ public class Scan {
         //print final statesif 
         print_states(states, accepting_states, states_string);
 
+        Parse parse = new Parse(states, accepting_states);
+
+        //Run the parser    
+        parse.Statement();
     };
 
     // Method to print final states

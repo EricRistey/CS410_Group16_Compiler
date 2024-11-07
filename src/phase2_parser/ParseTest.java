@@ -151,7 +151,7 @@ public class ParseTest {
         parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         //throws illegal argument exception
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class ParseTest {
         parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
         //throws illegal argument exception
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -257,6 +257,7 @@ public class ParseTest {
         parser.setTerminals(terminals, tokens);
         assertEquals("ACCEPT", parser.Statement());
     }
+
 
     @Test
     public void testIfElseStatement() {
@@ -362,7 +363,7 @@ public class ParseTest {
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", ")", "{", "int", "IDENT", "=", "INT_LIT", ";"}); // Missing closing brace
         String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";"};
         parser.setTerminals(terminals, tokens);
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -372,7 +373,7 @@ public class ParseTest {
         int[] terminals = encodeTerminals(new String[]{"if", "(", "IDENT", "<", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
         String[] tokens = new String[]{"if", "(", "test", "<", "10", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -392,7 +393,7 @@ public class ParseTest {
         int[] terminals = encodeTerminals(new String[]{"for", "(", "int", "IDENT", "=", "INT_LIT", ";", "IDENT", "<", "INT_LIT", ";", "IDENT", "=", "IDENT", "+", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
         String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -402,7 +403,7 @@ public class ParseTest {
         int[] terminals = encodeTerminals(new String[]{"while", "(", "INT_LIT", "{", "int", "IDENT", "=", "INT_LIT", ";", "}"});
         String[] tokens = new String[]{"while", "(", "10", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -454,7 +455,7 @@ public class ParseTest {
         String[] tokens = new String[]{"int", "test", "=", "10"};
         parser.setTerminals(terminals, tokens);
         //illegal argument exception
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -475,7 +476,7 @@ public class ParseTest {
         String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
         //illegal argument exception
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -486,7 +487,7 @@ public class ParseTest {
         String[] tokens = new String[]{"while", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -497,7 +498,7 @@ public class ParseTest {
         String[] tokens = new String[]{"for", "(", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test
@@ -508,7 +509,7 @@ public class ParseTest {
         String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", ")", "{", "int", "test", "=", "10", ";", "}"};
         parser.setTerminals(terminals, tokens);
         // assertEquals("REJECT", parser.Statement());
-        assertThrows(IllegalArgumentException.class, () -> parser.Statement());
+        assertEquals("REJECT", parser.Statement());
     }
 
     @Test

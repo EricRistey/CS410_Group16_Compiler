@@ -42,8 +42,8 @@ public class Parse{
         ////FOR TESTS///
         /// 
         //For w/ assignment
-        //int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
-        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
+        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
 
         ///Empty Nested For        
         //int[] terminals = new int[] {32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 17, 17};
@@ -52,8 +52,8 @@ public class Parse{
         ///REJECT INPUT///
         
         //Assignment w/o dividend
-        int[] terminals = new int[]{39, 30, 23, 40, 43};
-        String[] tokens = new String[]{"test", "=", "/", "10", ";"};
+        //int[] terminals = new int[]{39, 30, 23, 40, 43};
+        //String[] tokens = new String[]{"test", "=", "/", "10", ";"};
 
         ///WHILE TESTS///
         
@@ -342,25 +342,22 @@ public class Parse{
     /**
      * Advances the current token index if the current token matches the given
      * terminal. If the current token does not match the given terminal, or if
-     * we have reached the end of the input, an IllegalArgumentException is
-     * thrown.
+     * we have reached the end of the input, "REJECT" is returned.
      * 
      * @param terminal the terminal to match
-     * @throws IllegalArgumentException if the current token does not match the
-     *         given terminal, or if we have reached the end of the input
      */
-    public void expect(int terminal) {
+    public int expect(int terminal) {
         //If end of input
         if (index >= length) {
-            throw new IllegalArgumentException();
+           return -1;
         }
         //If terminal matches
         if(terminal == terminals[index]) {
             index++;
-            return;
+            return 0;
         }
         //mismatch
-        throw new IllegalArgumentException();
+        return -1;
     }
 
     /**
@@ -437,7 +434,10 @@ public class Parse{
                 return "REJECT";
             }
 
-            expect(43);
+            if(expect(43) == -1){
+                return "REJECT";
+            }
+            
         }
         if (index >= length) {
             return "ACCEPT";
@@ -458,15 +458,23 @@ public class Parse{
     private String While(){
         //Add decaf
         decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
-        expect(18);//(
+        if(expect(18) == -1){
+                return "REJECT";
+        }//(
         Bool();        //ex: i < 10
-        expect(19);//)
+        if(expect(19) == -1){
+            return "REJECT";
+        }//)
         
-        expect(16);//{
+        if(expect(16) == -1){
+            return "REJECT";
+        }//{
         Statement();
         //Add decaf
         decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lbl});
-        expect(17);//}
+        if(expect(17) == -1){
+            return "REJECT";
+        }//}
         //Add decaf
         decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
         return "ACCEPT";
@@ -482,20 +490,34 @@ public class Parse{
      */
     private String For(){
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
-        expect(18);  //(
-        Assignment();     //ex: i = 0
-        expect(43); //;
-        Bool();         //ex: i < 10
-        expect(43); //;
-        Assignment();   //ex: i = i + 1
-        expect(19);  //)
+        String res;
         
-        expect(16);  //{
+        if(expect(18) == -1){
+            return "REJECT";
+        }  //(
+        res = Assignment();     //ex: i = 0
+        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        if(expect(43) == -1 || res.equals("REJECT")){
+            return "REJECT";
+        } //;
+        res = Bool();         //ex: i < 10
+        if(expect(43) == -1 || res.equals("REJECT")){
+            return "REJECT";
+        } //;
+        res = Assignment();   //ex: i = i + 1
+        if(expect(19) == -1 || res.equals("REJECT")){
+            return "REJECT";
+        }  //)
+        
+        if(expect(16) == -1 || res.equals("REJECT")){
+            return "REJECT";
+        }  //{
         Statement();
         //Add decaf
         decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lbl});
-        expect(17);  //}
+        if(expect(17) == -1){
+            return "REJECT";
+        }  //}
         //Add decaf
         decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
         return "ACCEPT";
@@ -512,15 +534,23 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     private String If(){
-        expect(18);        //(
+        if(expect(18) == -1){
+            return "REJECT";
+        }        //(
         if (Bool().equals("REJECT")) {
             return "REJECT";
         }
 
-        expect(19); //)
-        expect(16); //{
+        if(expect(19) == -1){
+            return "REJECT";
+        } //)
+        if(expect(16) == -1){
+            return "REJECT";
+        } //{
         Statement();
-        expect(17); // }
+        if(expect(17) == -1){
+            return "REJECT";
+        } // }
         
         //ELSE-IF CASE
         if(accept(36)){
@@ -545,10 +575,14 @@ public class Parse{
      */
     public String Else() {
         //{
-        expect(16);
+        if(expect(16) == -1){
+            return "REJECT";
+        }
         Statement();
         //}
-        expect(17);
+        if(expect(17) == -1){
+            return "REJECT";
+        }
 
         //No decaf for else because there is no TST to compliment it
         return "ACCEPT";
@@ -564,14 +598,22 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String ElseIf() {
-        expect(18);//(
+        if(expect(18) == -1){
+            return "REJECT";
+        }//(
         if (Bool().equals("REJECT")) {
             return "REJECT";
         }
-        expect(19);//)
-        expect(16);//{
+        if(expect(19) == -1){
+            return "REJECT";
+        }//)
+        if(expect(16) == -1){
+            return "REJECT";
+        }//{
         Statement();
-        expect(17);//}
+        if(expect(17) == -1){
+            return "REJECT";
+        }//}
         //ELSE CASE
         if(accept(35)){
             Else();
@@ -598,7 +640,9 @@ public class Parse{
             if(isIdentifier(index)){
                 dest = tokens[index];
                 accept(terminals[index]);
-                expect(30); //=
+                if(expect(30) == -1){
+                    return "REJECT";
+                } //=
                 String result = Expr(dest);
                 if(result.equals("REJECT")){
                     return "REJECT";
@@ -615,7 +659,9 @@ public class Parse{
             if(isIdentifier(index)){
                 dest = tokens[index];
                 accept(terminals[index]);
-                expect(30); //=
+                if(expect(30) == -1){
+                    return "REJECT";
+                } //=
                 String result = Expr(dest);
                 if(result.equals("REJECT")){
                     return "REJECT";
@@ -632,7 +678,9 @@ public class Parse{
         else if(isIdentifier(index)){
             dest = tokens[index];
             accept(terminals[index]);       //if token is an identifier, accept it
-            expect(30); //= 
+            if(expect(30) == -1){
+                return "REJECT";
+            } //= 
             //expr
             String result = Expr(dest);
             if(result.equals("REJECT")){
@@ -652,8 +700,8 @@ public class Parse{
                 return "ACCEPT";
             }
         }*/
-        throw new IllegalArgumentException("Invalid statement");
-        //return "REJECT";
+        //throw new IllegalArgumentException("Invalid statement");
+        return "REJECT";
     }
 
     /**
@@ -743,7 +791,9 @@ public class Parse{
             mathOps.add(tokens[index-1]);
             Expr(dest);
             mathOps.add(tokens[index]);
-            expect(19); //)
+        if(expect(19) == -1){
+            return "REJECT";
+        } //)
             if (isOperator(index) != -1) {       //peek for operator. if there is an operator, then there is another expression
                 //*, /, +, -
                 if(accept(20) || accept(21) || accept(22) || accept(23)){
