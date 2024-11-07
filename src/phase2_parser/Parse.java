@@ -33,12 +33,70 @@ public class Parse{
     private int lbl;
     private String dest;
 
+    //Using VS CODE:
+    //Compile the files:  javac -d bin src/phase2_parser/Parse.java 
+    //Run the program:  java -cp bin phase2_parser.Parse
+
     public static void main(String[] args) {
         Parse parser = new Parse();
-        int[] terminals = new int[]{32, 18, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
-        String[] tokens = new String[]{"for", "(", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        ////FOR TESTS///
+        /// 
+        //For w/ assignment
+        //int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
+        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+
+        ///Empty Nested For        
+        //int[] terminals = new int[] {32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 17, 17};
+        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "}", "}"};
+
+        ///REJECT INPUT///
+        
+        //Assignment w/o dividend
+        int[] terminals = new int[]{39, 30, 23, 40, 43};
+        String[] tokens = new String[]{"test", "=", "/", "10", ";"};
+
+        ///WHILE TESTS///
+        
+        /// Empty While
+        //int[] terminals = new int[]{33, 18, 40, 19, 16, 17};
+        //String[] tokens = new String[]{"while", "(", "10", ")", "{", "}"};
+
+        ///IFs///
+        
+        /// Empty If and Elseif 
+        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 17, 36, 18, 39, 28, 40, 19, 16, 17};
+        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}", "else if", "(", "test", ">", "10", ")", "{", "}"};
+
+        //If else
+            // if ( i < 10 ) { int IDENT = INT_LIT; } else { float IDENT = FLOAT_LIT; }
+        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 38, 39, 30, 40, 43, 17, 35, 16, 37, 39, 30, 41, 43, 17};
+        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";", "}", "else", "{", "float", "test", "=", "10.0", ";", "}"};
+
+        //Complex if
+            // if ( ( INT_LIT * INT_LIT ) <= ( IDENT + FLOAT_LIT ) ) { IDENT = INT_LIT; }
+        //int[] terminals = new int[] {34, 18, 18, 40, 22, 40, 19, 26, 18, 39, 20, 41, 19, 17, 16, 39, 30, 40, 43, 17};
+        //String[] tokens = new String[]{"if", "(", "(", "10", "*", "10", ")", "<=", "(", "test", "+", "10.0", ")", ")", "{", "test", "=", "10", ";", "}"};
+
+        ///Empty Nested If
+        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 34, 18, 39, 28, 40, 19, 16, 17, 17};
+        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "}", "}"};
+
+        ///ASSIGNMENTS///
+                //IDENT = float_literal * ( INT_LIT + INT_LIT );
+        //int[] terminals = new int[] {39, 30, 41, 22, 18, 40, 20, 40, 19, 43};
+        //String[] tokens = new String[]{"test", "=", "10.0", "*", "(", "10", "+", "10", ")", ";"};
+
         parser.setTerminals(terminals, tokens);
-        parser.Statement();
+        String result = parser.Statement();
+
+        System.out.println("RESULT: "+result);
+        parser.printAtoms(parser.decafAtoms);
+    }
+
+    private void printAtoms(List<Object[]> instructions) {
+        for(Object[] atom : instructions) {
+            System.out.println(Arrays.toString(atom));
+        }
     }
 
     
@@ -124,6 +182,7 @@ public class Parse{
         Stack<String> stack = new Stack<>();
 
         for(String token : expression) {
+            System.out.println("TOKEN: " + token);
             if(!token.equals("+") && !token.equals("-") && !token.equals("*") && !token.equals("/")) {
                 stack.push(token);
             } else if(stack.size() > 1) {
