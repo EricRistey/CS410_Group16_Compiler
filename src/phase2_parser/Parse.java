@@ -99,6 +99,12 @@ public class Parse{
         }
     }
 
+    public void printAtoms() {
+        for(Object[] atom : decafAtoms) {
+            System.out.println(Arrays.toString(atom));
+        }
+    }
+
     
     /**
      * Converts an infix expression to postfix notation. The expression is
