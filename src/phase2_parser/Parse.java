@@ -32,6 +32,7 @@ public class Parse{
     private List<String> mathOps;
     private int lbl;
     private String dest;
+    private int flag;
 
     //Using VS CODE:
     //Compile the files:  javac -d bin src/phase2_parser/Parse.java 
@@ -181,6 +182,7 @@ public class Parse{
     private void evalPostfix(String[] expression) {
         Stack<String> stack = new Stack<>();
 
+        System.out.println("SIZE: " + expression.length);
         for(String token : expression) {
             System.out.println("TOKEN: " + token);
             if(!token.equals("+") && !token.equals("-") && !token.equals("*") && !token.equals("/")) {
@@ -188,29 +190,39 @@ public class Parse{
             } else if(stack.size() > 1) {
                 String b = stack.pop();
                 String a = stack.pop();
+                System.out.println("AB: " + a + "," + b);
                 if(token.equals("+")) {
                     //Add decaf
                     decafAtoms.add(new Object[] {"ADD", a, b, dest});
-                    stack.push(dest);
+                    //stack.push(dest);
                 } else if(token.equals("-")) {
                     //Add decaf
                     decafAtoms.add(new Object[] {"SUB", a, b, dest});
-                    stack.push(dest);
+                    //stack.push(dest);
                 } else if(token.equals("*")) {
                     //Add decaf
                     decafAtoms.add(new Object[] {"MUL", a, b, dest});
-                    stack.push(dest);
+                    //stack.push(dest);
                 } else if(token.equals("/")) {
                     //Add decaf
                     decafAtoms.add(new Object[] {"DIV", a, b, dest});
-                    stack.push(dest);
+                    //stack.push(dest);
                 }
             } else {
                 String a = stack.pop();
+                System.out.println("AX: " + a);
                 //Add decaf
                 decafAtoms.add(new Object[] {"MOV", token, a, dest});
             }
         }
+
+        if(!stack.isEmpty() && flag == 1) {
+            String a = stack.pop();
+            System.out.println("A: " + a);
+            //Add decaf
+            decafAtoms.add(new Object[] {"MOV", "", a, dest});
+        }
+
     }
 
     /**
@@ -300,6 +312,7 @@ public class Parse{
         this.dest = "";
         this.mathOps = new ArrayList<>();
         this.tokens = tokens;
+        this.flag = 0;
     }
     public Parse() {
         this.terminals = new int[0];
@@ -434,6 +447,9 @@ public class Parse{
                 return "REJECT";
             }
 
+            infixToPostfix(mathOps);
+            mathOps.clear();
+
             if(expect(43) == -1){
                 return "REJECT";
             }
@@ -489,17 +505,23 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     private String For(){
-        //Add decaf
+        
         String res;
         
         if(expect(18) == -1){
             return "REJECT";
         }  //(
         res = Assignment();     //ex: i = 0
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        //Add atoms
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
         } //;
+
+        infixToPostfix(mathOps);
+        mathOps.clear();
+
+        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+
         res = Bool();         //ex: i < 10
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
@@ -508,11 +530,19 @@ public class Parse{
         if(expect(19) == -1 || res.equals("REJECT")){
             return "REJECT";
         }  //)
+
+        List<String> temp = new ArrayList<>();
+        temp.addAll(mathOps);
+        mathOps.clear();
         
-        if(expect(16) == -1 || res.equals("REJECT")){
+        if(expect(16) == -1){
             return "REJECT";
         }  //{
         Statement();
+
+        System.out.println("POSTFIX: " + temp.toString());
+        infixToPostfix(temp);
+        
         //Add decaf
         decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lbl});
         if(expect(17) == -1){
@@ -634,6 +664,7 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String Assignment() {
+        flag = 1;
         //float
         if(accept(37)){
             //identifier
@@ -647,8 +678,7 @@ public class Parse{
                 if(result.equals("REJECT")){
                     return "REJECT";
                 }
-                infixToPostfix(mathOps);
-                mathOps.clear();
+                
                 //expect(41); //float literal
                 return "ACCEPT";
             }
@@ -666,8 +696,8 @@ public class Parse{
                 if(result.equals("REJECT")){
                     return "REJECT";
                 }
-                infixToPostfix(mathOps);
-                mathOps.clear();
+                System.out.println("MATHOPS: " + mathOps.toString());
+                
                 //expect(40); //int literal
                 return "ACCEPT";
             }
@@ -686,8 +716,7 @@ public class Parse{
             if(result.equals("REJECT")){
                 return "REJECT";
             }
-            infixToPostfix(mathOps);
-            mathOps.clear();
+            
             return "ACCEPT";
         }
         /*
@@ -823,6 +852,7 @@ public class Parse{
      * @return "ACCEPT" if Bool is valid, "REJECT" otherwise
      */
     public String Bool() {
+        flag = 0;
         //EXPR CASE
         String left = Expr(null);
         infixToPostfix(mathOps);
