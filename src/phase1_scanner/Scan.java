@@ -117,6 +117,9 @@ public class Scan {
 
         //Run the parser    
         parse.Statement();
+
+        //Print the atoms
+        parse.printAtoms();
     };
 
     // Method to print final states
