@@ -110,15 +110,23 @@ public class Scan {
 
 
 
-        //print final statesif 
+        //print final statesif
         print_states(states, accepting_states, states_string);
 
-        Parse parse = new Parse(states, accepting_states);
+        //Create new Parse object
+        Parse parse = new Parse(states, states_string, j);
 
-        //Run the parser    
-        parse.Statement();
+        //Run the parser and print result of statement (ACCEPT or REJECT)  
+        System.out.println(parse.Statement());
 
         //Print the atoms
+        //Examples:
+        //Complex Expression : test=(test+10)*(test-10);                                                     
+        //If :  if(4+5<10*2){}
+        //else if :  if(x<y){}elseif{}
+        //else :  if(x<y){}else{}
+        //For :  for(int x=5;x<10;x=x+1){}
+        //While :  while(x<y){}     
         parse.printAtoms();
     };
 

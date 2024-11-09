@@ -31,6 +31,7 @@ public class Parse{
     private List<Object[]> decafAtoms;
     private List<String> mathOps;
     private int lbl;
+    private int tempDest;
     private String dest;
     private int flag;
 
@@ -309,12 +310,13 @@ public class Parse{
     }
 
 
-    public Parse(int[] terminals, String[] tokens) {
+    public Parse(int[] terminals, String[] tokens, int length) {
         this.terminals = terminals;
         this.index = 0;
-        this.length = terminals.length;
+        this.length = length;
         this.decafAtoms = new ArrayList<>();
         this.lbl = 0;
+        this.tempDest = 0;
         this.dest = "";
         this.mathOps = new ArrayList<>();
         this.tokens = tokens;
