@@ -126,7 +126,7 @@ public class Parse{
     }
 
     private void createADD(String a, String b, String dest){
-        if(dest == ""){
+        if(dest == ""  || dest == null){
             tempDest++;
             decafAtoms.add(new Object[] {"ADD", a, b, "t"+tempDest});
         }
@@ -136,7 +136,7 @@ public class Parse{
     }
 
     private void createSUB(String a, String b, String dest){
-        if(dest == ""){
+        if(dest == "" || dest == null){
             tempDest++;
             decafAtoms.add(new Object[] {"SUB", a, b, "t"+tempDest});
         }
@@ -146,7 +146,7 @@ public class Parse{
     }
 
     private void createMUL(String a, String b, String dest){
-        if(dest == ""){
+        if(dest == "" || dest == null){
             tempDest++;
             decafAtoms.add(new Object[] {"MUL", a, b, "t"+tempDest});
         }
@@ -155,7 +155,7 @@ public class Parse{
     }
 
     private void createDIV(String a, String b, String dest){
-        if(dest == ""){
+        if(dest == "" || dest == null){
             tempDest++;
             decafAtoms.add(new Object[] {"DIV", a, b, "t"+tempDest});
         }
@@ -391,6 +391,9 @@ public class Parse{
         this.decafAtoms = new ArrayList<>();
         this.mathOps = new ArrayList<>();
         this.tokens = tokens;
+        this.lbl = -1;
+        this.tempDest = -1;
+        this.dest = "";
     }
 
     /**
@@ -543,7 +546,7 @@ public class Parse{
         if(expect(18) == -1){
                 return "REJECT";
         }//(
-        Bool(lblNumber);        //ex: i < 10
+        Bool(lblNumber, "while");        //ex: i < 10
         if(expect(19) == -1){
             return "REJECT";
         }//)
@@ -592,7 +595,7 @@ public class Parse{
 
         createLBL(lblNumber);
 
-        res = Bool(lblNumber);         //ex: i < 10
+        res = Bool(lblNumber, "for");         //ex: i < 10
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
         } //;
@@ -635,11 +638,10 @@ public class Parse{
      */
     private String If(){
         int lblNumber = lbl+1;
-
         if(expect(18) == -1){
             return "REJECT";
         }        //(
-        if (Bool(lblNumber).equals("REJECT")) {
+        if (Bool(lblNumber, "if").equals("REJECT")) {
             return "REJECT";
         }
 
@@ -654,16 +656,17 @@ public class Parse{
             return "REJECT";
         } // }
         
+        //Add decaf
+        createLBL(lblNumber);
+
         //ELSE-IF CASE
         if(accept(36)){
-            return ElseIf();
+            ElseIf();
         }
         //ELSE CASE
         else if(accept(35)){
-            return Else();
+            Else();
         }
-        //Add decaf
-        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -676,8 +679,6 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String Else() {
-        createLBL(lbl+1);
-
         //{
         if(expect(16) == -1){
             return "REJECT";
@@ -702,12 +703,12 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String ElseIf() {
-        int lblNumber = lbl+1;
+        int lblNumber = lbl;
 
         if(expect(18) == -1){
             return "REJECT";
         }//(
-        if (Bool(lblNumber).equals("REJECT")) {
+        if (Bool(lblNumber, "elseif").equals("REJECT")) {
             return "REJECT";
         }
         if(expect(19) == -1){
@@ -720,12 +721,19 @@ public class Parse{
         if(expect(17) == -1){
             return "REJECT";
         }//}
+
+        //Add decaf
+        System.out.println(lbl);
+        createLBL(lblNumber);
+        
+        //ELSE-IF CASE
+        if(accept(36)){
+            ElseIf();
+        }
         //ELSE CASE
-        if(accept(35)){
+        else if(accept(35)){
             Else();
         }
-        //Add decaf
-        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -927,7 +935,7 @@ public class Parse{
      * 
      * @return "ACCEPT" if Bool is valid, "REJECT" otherwise
      */
-    public String Bool(int lblNumber) {
+    public String Bool(int lblNumber, String from) {
         flag = 0;
         //EXPR CASE
         String left = Expr(null);
@@ -942,7 +950,19 @@ public class Parse{
             }   
             infixToPostfix(mathOps);
             mathOps.clear();
-            createTST(lblNumber+1, left, right, cmp);
+
+            switch(from){
+                case "while":
+                case "for":
+                    createTST(lblNumber+1, left, right, cmp);
+                    break;
+                case "if":
+                case "elseif":
+                    createTST(lblNumber, left, right, cmp);
+                    break;
+                default:
+                    return "REJECT";
+            }
             return "ACCEPT";
         }
         
