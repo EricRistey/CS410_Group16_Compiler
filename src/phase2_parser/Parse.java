@@ -107,7 +107,63 @@ public class Parse{
         }
     }
 
-    
+    private void createLBL(int lblNumber){
+        lbl++;
+        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lblNumber});
+    }
+
+    private void createJMP(int lblNumber){
+        decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lblNumber});
+    }
+
+    private void createTST(int lblNumber, String left, String right, int cmp){
+        lbl++;
+        decafAtoms.add(new Object[] {"TST", left, right, "", cmp, "L"+lblNumber});
+    }
+
+    private void createMOV(String token, String a, String dest){
+        decafAtoms.add(new Object[] {"MOV", a, token, dest});
+    }
+
+    private void createADD(String a, String b, String dest){
+        if(dest == ""){
+            tempDest++;
+            decafAtoms.add(new Object[] {"ADD", a, b, "t"+tempDest});
+        }
+        else{
+            decafAtoms.add(new Object[] {"ADD", a, b, dest});
+        }
+    }
+
+    private void createSUB(String a, String b, String dest){
+        if(dest == ""){
+            tempDest++;
+            decafAtoms.add(new Object[] {"SUB", a, b, "t"+tempDest});
+        }
+        else{
+            decafAtoms.add(new Object[] {"SUB", a, b, dest});
+        }
+    }
+
+    private void createMUL(String a, String b, String dest){
+        if(dest == ""){
+            tempDest++;
+            decafAtoms.add(new Object[] {"MUL", a, b, "t"+tempDest});
+        }
+        else{
+            decafAtoms.add(new Object[] {"MUL", a, b, dest});}
+    }
+
+    private void createDIV(String a, String b, String dest){
+        if(dest == ""){
+            tempDest++;
+            decafAtoms.add(new Object[] {"DIV", a, b, "t"+tempDest});
+        }
+        else{
+            decafAtoms.add(new Object[] {"DIV", a, b, dest});
+        }
+    }
+
     /**
      * Converts an infix expression to postfix notation. The expression is
      * tokenized and then processed in order from left to right. When a
@@ -200,26 +256,26 @@ public class Parse{
                 System.out.println("AB: " + a + "," + b);
                 if(token.equals("+")) {
                     //Add decaf
-                    decafAtoms.add(new Object[] {"ADD", a, b, dest});
+                    createADD(a, b, dest);
                     //stack.push(dest);
                 } else if(token.equals("-")) {
                     //Add decaf
-                    decafAtoms.add(new Object[] {"SUB", a, b, dest});
+                    createSUB(a, b, dest);
                     //stack.push(dest);
                 } else if(token.equals("*")) {
                     //Add decaf
-                    decafAtoms.add(new Object[] {"MUL", a, b, dest});
+                    createMUL(a, b, dest);
                     //stack.push(dest);
                 } else if(token.equals("/")) {
                     //Add decaf
-                    decafAtoms.add(new Object[] {"DIV", a, b, dest});
+                    createDIV(a, b, dest);
                     //stack.push(dest);
                 }
             } else {
                 String a = stack.pop();
                 System.out.println("AX: " + a);
                 //Add decaf
-                decafAtoms.add(new Object[] {"MOV", token, a, dest});
+                createMOV(token, a, dest);
             }
         }
 
@@ -227,7 +283,7 @@ public class Parse{
             String a = stack.pop();
             System.out.println("A: " + a);
             //Add decaf
-            decafAtoms.add(new Object[] {"MOV", "", a, dest});
+            createMOV("", a, dest);
         }
 
     }
@@ -290,19 +346,20 @@ public class Parse{
         }
         System.err.println("COMPARISON_OPERATOR_TOKENS: " + terminals[index]);
 
+        // == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
         switch (terminals[index]) {
-            case 25:
-                return 6;
-            case 26:
-                return 2;
-            case 27:
-                return 4;
-            case 28:
+            case 25:        //NOT_EQUALS_OP
+                return 1;   
+            case 26:        //LT_OP
+                return 5;   
+            case 27:        //LT_ET_OP
                 return 3;
-            case 29:
-                return 5;
-            case 31:
-                return 1;
+            case 28:        //GT_OP
+                return 4;
+            case 29:        //GT_ET_OP
+                return 2;
+            case 31:        //EQUALS_OP
+                return 6;
             default:
                 return -1;
         }
@@ -315,8 +372,8 @@ public class Parse{
         this.index = 0;
         this.length = length;
         this.decafAtoms = new ArrayList<>();
-        this.lbl = 0;
-        this.tempDest = 0;
+        this.lbl = -1;
+        this.tempDest = -1;
         this.dest = "";
         this.mathOps = new ArrayList<>();
         this.tokens = tokens;
@@ -481,11 +538,12 @@ public class Parse{
      */
     private String While(){
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        int lblNumber = lbl+1;
+        createLBL(lblNumber);
         if(expect(18) == -1){
                 return "REJECT";
         }//(
-        Bool();        //ex: i < 10
+        Bool(lblNumber);        //ex: i < 10
         if(expect(19) == -1){
             return "REJECT";
         }//)
@@ -494,13 +552,16 @@ public class Parse{
             return "REJECT";
         }//{
         Statement();
+
         //Add decaf
-        decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lbl});
+        createJMP(lblNumber);
+       
+        
         if(expect(17) == -1){
             return "REJECT";
         }//}
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -515,6 +576,7 @@ public class Parse{
     private String For(){
         
         String res;
+        int lblNumber = lbl+1;
         
         if(expect(18) == -1){
             return "REJECT";
@@ -528,9 +590,9 @@ public class Parse{
         infixToPostfix(mathOps);
         mathOps.clear();
 
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        createLBL(lblNumber);
 
-        res = Bool();         //ex: i < 10
+        res = Bool(lblNumber);         //ex: i < 10
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
         } //;
@@ -552,12 +614,12 @@ public class Parse{
         infixToPostfix(temp);
         
         //Add decaf
-        decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lbl});
+        createJMP(lblNumber);
         if(expect(17) == -1){
             return "REJECT";
         }  //}
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -572,10 +634,12 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     private String If(){
+        int lblNumber = lbl+1;
+
         if(expect(18) == -1){
             return "REJECT";
         }        //(
-        if (Bool().equals("REJECT")) {
+        if (Bool(lblNumber).equals("REJECT")) {
             return "REJECT";
         }
 
@@ -599,7 +663,7 @@ public class Parse{
             return Else();
         }
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -612,6 +676,8 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String Else() {
+        createLBL(lbl+1);
+
         //{
         if(expect(16) == -1){
             return "REJECT";
@@ -636,10 +702,12 @@ public class Parse{
      * @return "ACCEPT" if the input matches the grammar rules, "REJECT" otherwise
      */
     public String ElseIf() {
+        int lblNumber = lbl+1;
+
         if(expect(18) == -1){
             return "REJECT";
         }//(
-        if (Bool().equals("REJECT")) {
+        if (Bool(lblNumber).equals("REJECT")) {
             return "REJECT";
         }
         if(expect(19) == -1){
@@ -657,7 +725,7 @@ public class Parse{
             Else();
         }
         //Add decaf
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lbl});
+        createLBL(lblNumber+1);
         return "ACCEPT";
     }
 
@@ -786,7 +854,7 @@ public class Parse{
                 }
             }
             else{
-                return "ACCEPT";//INSERT DECAF
+                return tokens[index-1];//INSERT DECAF
             }
         }
         //int_literal
@@ -803,7 +871,7 @@ public class Parse{
                     // return "ACCEPT";//INSERT DECAF
                 }
             }
-            return "ACCEPT";//INSERT DECAF
+            return tokens[index-1];//INSERT DECAF
 
         }
         //float_literal
@@ -821,7 +889,7 @@ public class Parse{
                 }
             }
 
-            return "ACCEPT";//INSERT DECAF
+            return tokens[index-1];//INSERT DECAF
         }
         
         if(accept(18)){ // ( Expr )
@@ -859,7 +927,7 @@ public class Parse{
      * 
      * @return "ACCEPT" if Bool is valid, "REJECT" otherwise
      */
-    public String Bool() {
+    public String Bool(int lblNumber) {
         flag = 0;
         //EXPR CASE
         String left = Expr(null);
@@ -874,7 +942,7 @@ public class Parse{
             }   
             infixToPostfix(mathOps);
             mathOps.clear();
-            decafAtoms.add(new Object[] {"TST", left, right, "", cmp, "L"+lbl});
+            createTST(lblNumber+1, left, right, cmp);
             return "ACCEPT";
         }
         

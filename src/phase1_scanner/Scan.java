@@ -116,8 +116,9 @@ public class Scan {
         //Create new Parse object
         Parse parse = new Parse(states, states_string, j);
 
-        //Run the parser and print result of statement (ACCEPT or REJECT)  
-        System.out.println(parse.Statement());
+        //Run the parser and print result of statement (ACCEPT or REJECT)
+        String parseResult = parse.Statement();
+        System.out.println(parseResult);
 
         //Print the atoms
         //Examples:
@@ -126,7 +127,7 @@ public class Scan {
         //else if :  if(x<y){}elseif{}
         //else :  if(x<y){}else{}
         //For :  for(int x=5;x<10;x=x+1){}
-        //While :  while(x<y){}     
+        //While :  while(x<y){}
         parse.printAtoms();
     };
 
