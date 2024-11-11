@@ -44,8 +44,8 @@ public class Parse{
         ////FOR TESTS///
         /// 
         //For w/ assignment
-        int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
-        String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
+        //int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
+        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
 
         ///Empty Nested For        
         //int[] terminals = new int[] {32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 17, 17};
@@ -54,14 +54,23 @@ public class Parse{
         ///REJECT INPUT///
         
         //Assignment w/o dividend
-        //int[] terminals = new int[]{39, 30, 23, 40, 43};
-        //String[] tokens = new String[]{"test", "=", "/", "10", ";"};
+        int[] terminals = new int[]{39, 30, 23, 40, 43};
+        String[] tokens = new String[]{"test", "=", "/", "10", ";"};
 
         ///WHILE TESTS///
         
         /// Empty While
         //int[] terminals = new int[]{33, 18, 40, 19, 16, 17};
         //String[] tokens = new String[]{"while", "(", "10", ")", "{", "}"};
+
+        
+        //WHILE w/ assignment
+        //int[] terminals = new int[] {33, 18, 40, 26, 39, 19, 16, 38, 39, 30, 40, 43, 17};
+        //String[] tokens = new String[]{"while", "(", "10", "<", "y", ")", "{", "int", "test", "=", "10", ";", "}"};
+
+        //Nested While
+        //int[] terminals = new int[] {33, 18, 40, 26, 39, 19, 16, 33, 18, 40, 26, 39, 19, 16, 38, 39, 30, 40, 43, 17, 17};
+        //String[] tokens = new String[]{"while", "(", "10", "<", "y", ")", "{", "while", "(", "10", "<", "y", ")", "{", "int", "test", "=", "10", ";", "}", "}"};
 
         ///IFs///
         
@@ -273,7 +282,7 @@ public class Parse{
                 }
             } else {
                 String a = stack.pop();
-                System.out.println("AX: " + a);
+                //System.out.println("AX: " + a);
                 //Add decaf
                 createMOV(token, a, dest);
             }
@@ -281,7 +290,7 @@ public class Parse{
 
         if(!stack.isEmpty() && flag == 1) {
             String a = stack.pop();
-            System.out.println("A: " + a);
+            //System.out.println("A: " + a);
             //Add decaf
             createMOV("", a, dest);
         }
@@ -344,7 +353,7 @@ public class Parse{
         if (index >= length) {
             return -1;
         }
-        System.err.println("COMPARISON_OPERATOR_TOKENS: " + terminals[index]);
+        //System.err.println("COMPARISON_OPERATOR_TOKENS: " + terminals[index]);
 
         // == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
         switch (terminals[index]) {
@@ -477,6 +486,8 @@ public class Parse{
         //IF CASE
         if (accept(34)) {
             if (If().equals("REJECT")) {
+                //Empty atoms
+                decafAtoms.clear();
                 return "REJECT";
             }
         }
@@ -487,6 +498,8 @@ public class Parse{
         //FOR CASE
         if (accept(32)) {
             if (For().equals("REJECT")) {
+                //Empty atoms
+                decafAtoms.clear();
                 return "REJECT";
             }
         }
@@ -497,6 +510,8 @@ public class Parse{
         //WHILE CASE
         if(accept(33)){
             if (While().equals("REJECT")) {
+                //Empty atoms
+                decafAtoms.clear();
                 return "REJECT";
             }
         }
@@ -512,6 +527,8 @@ public class Parse{
             String result = Assignment();
             
             if (result.equals("REJECT")) {
+                //Empty atoms
+                decafAtoms.clear();
                 return "REJECT";
             }
 
@@ -519,7 +536,12 @@ public class Parse{
             mathOps.clear();
 
             if(expect(43) == -1){
+                //Empty atoms
+                decafAtoms.clear();
                 return "REJECT";
+            }
+            if(index < length){
+                return Statement();
             }
             
         }
@@ -527,6 +549,8 @@ public class Parse{
             return "ACCEPT";
         }
 
+        //Empty atoms
+        decafAtoms.clear();
         return "REJECT";    //not end of input, but no valid statement
         
     }
