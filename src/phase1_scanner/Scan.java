@@ -124,11 +124,13 @@ public class Scan {
         //Examples:
         //Complex Expression : test=(test+10)*(test-10);                                                     
         //If :  if(4+5<10*2){}
-        //else if :  if(x<y){}elseif{}
+        //else if :  if(x<y){}elseif(a<b){}
         //else :  if(x<y){}else{}
         //For :  for(int x=5;x<10;x=x+1){}
         //While :  while(x<y){}
-        parse.printAtoms();
+        if(parseResult != "REJECT"){
+            parse.printAtoms();
+        }
     };
 
     // Method to print final states
