@@ -37,10 +37,14 @@ public class Scan {
         int state = 0;
 
         //Gather input from user
-        System.out.println("Enter input stream: ");
-        Scanner scan = new Scanner(System.in);
-        String input = scan.nextLine();
-        scan.close();
+        /****USING THE Testing.txt FILE: Just type in Testing.txt when running for the contents to be read****/
+        String input = read_file();
+        
+        /****USING THE TERMINAL****/
+        //System.out.println("Enter input stream: ");
+        //Scanner scan = new Scanner(System.in);
+        //String input = scan.nextLine();
+        //scan.close();
 
         //States list will contain all final states that the state machine reaches
         int states[] = new int[100];
@@ -140,5 +144,45 @@ public class Scan {
             System.out.println("State: " + accepting_states[states[i]] + " | " 
             + "Input: " + states_string[i] + " | " + "Encoding: " + states[i]);
         }
+    }
+
+    static String read_file(){
+        Scanner file = new Scanner(System.in);
+        while(true){
+            System.out.println("Enter input file name: ");
+            String fileName = file.nextLine();
+            //file.close();
+            try{
+                //Open file
+                java.io.File file1 = new java.io.File(fileName);
+                if(!file1.exists()){
+                    System.out.println("File does not exist.");
+                    file.close();
+                }
+                else{
+                    
+                    //Read file
+                    java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file1));
+                    StringBuilder fileContents = new StringBuilder();
+                    try {
+                        String line = br.readLine();
+                        while(line != null){
+                            System.out.println(line);
+                            fileContents.append(line);
+                            line = br.readLine();
+                        }
+                    } finally {
+                        br.close();
+                    }
+                    System.out.println("FILE CONTENTS:\n" + fileContents.toString());
+                    file.close();
+                    return fileContents.toString();
+                }
+            }
+            catch(Exception e){
+                System.out.println("File does not exist." + e);
+            }
+        }
+        
     }
 };
