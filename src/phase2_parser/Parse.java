@@ -33,7 +33,7 @@ public class Parse{
     private int lbl;
     private int tempDest;
     private String dest;
-    private int flag;
+    private int flag;// 1 => Assignment, 0 => Bool
 
     //Using VS CODE:
     //Compile the files:  javac -d bin src/phase2_parser/Parse.java 
@@ -255,6 +255,7 @@ public class Parse{
         Stack<String> stack = new Stack<>();
 
         System.out.println("SIZE: " + expression.length);
+        System.out.println("POST: " + Arrays.toString(expression));
         for(String token : expression) {
             System.out.println("TOKEN: " + token);
             if(!token.equals("+") && !token.equals("-") && !token.equals("*") && !token.equals("/")) {
@@ -264,37 +265,42 @@ public class Parse{
                 String a = stack.pop();
                 System.out.println("AB: " + a + "," + b);
                 if(token.equals("+")) {
-                    //Add decaf
-                    createADD(a, b, dest);
-                    //stack.push(dest);
+                    //Make atoms
+                    createADD(a, b, "L"+(++tempDest));
+                    //push temp var on stack
+                    stack.push("L"+tempDest);
                 } else if(token.equals("-")) {
-                    //Add decaf
-                    createSUB(a, b, dest);
-                    //stack.push(dest);
+                    //Make atoms
+                    createSUB(a, b, "L"+(++tempDest));
+                    //push temp var on stack
+                    stack.push("L"+tempDest);
                 } else if(token.equals("*")) {
-                    //Add decaf
-                    createMUL(a, b, dest);
-                    //stack.push(dest);
+                    //Make atoms
+                    createMUL(a, b, "L"+(++tempDest));
+                    //push temp var on stack
+                    stack.push("L"+tempDest);
                 } else if(token.equals("/")) {
-                    //Add decaf
-                    createDIV(a, b, dest);
-                    //stack.push(dest);
+                    //Make atoms
+                    createDIV(a, b, "L"+(++tempDest));
+                    //push temp var on stack
+                    stack.push("L"+tempDest);
                 }
             } else {
+                //At the end of the expression and there is one more operand in stack, move into the original destination
                 String a = stack.pop();
-                //System.out.println("AX: " + a);
+                System.out.println("AX: " + a);
                 //Add decaf
-                createMOV(token, a, dest);
+                createMOV("", a, dest);
             }
         }
 
+        //Account for operations like "int x = 10;"
         if(!stack.isEmpty() && flag == 1) {
             String a = stack.pop();
             //System.out.println("A: " + a);
             //Add decaf
             createMOV("", a, dest);
         }
-
     }
 
     /**
