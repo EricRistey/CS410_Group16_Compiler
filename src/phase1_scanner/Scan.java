@@ -47,8 +47,8 @@ public class Scan {
         //scan.close();
 
         //States list will contain all final states that the state machine reaches
-        int states[] = new int[100];
-        String states_string[] = new String[100];
+        int states[] = new int[200];
+        String states_string[] = new String[200];
 
         //Current character
         int inp;

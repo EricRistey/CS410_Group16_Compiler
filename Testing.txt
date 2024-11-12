@@ -4,6 +4,9 @@ int b = (4*10)/(4/2);
 
 if(a == b){
     result = 1;
+    for(int i = 0; i < 10; i=i+1){
+        k = k+1;
+    }
 }
 elseif(a < b){
     result = 2;
