@@ -1,2 +1,21 @@
-int j = 10;
-int test = 1 + 10;
+int result = 0;
+int a = 27 - 13;
+int b = (4*10)/(4/2);
+
+if(a == b){
+    result = 1;
+}
+elseif(a < b){
+    result = 2;
+}
+else{
+    result = 3;
+}
+
+for(int i = 0; i < 10; i=i+1){
+    result = result+1;
+}
+
+while(result > 0){
+    result = result - 1;
+}

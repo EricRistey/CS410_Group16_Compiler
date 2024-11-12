@@ -264,24 +264,24 @@ public class Parse{
                 System.out.println("AB: " + a + "," + b);
                 if(token.equals("+")) {
                     //Make atoms
-                    createADD(a, b, "L"+(++tempDest));
+                    createADD(a, b, "t"+(++tempDest));
                     //push temp var on stack
-                    stack.push("L"+tempDest);
+                    stack.push("t"+tempDest);
                 } else if(token.equals("-")) {
                     //Make atoms
-                    createSUB(a, b, "L"+(++tempDest));
+                    createSUB(a, b, "t"+(++tempDest));
                     //push temp var on stack
-                    stack.push("L"+tempDest);
+                    stack.push("t"+tempDest);
                 } else if(token.equals("*")) {
                     //Make atoms
-                    createMUL(a, b, "L"+(++tempDest));
+                    createMUL(a, b, "t"+(++tempDest));
                     //push temp var on stack
-                    stack.push("L"+tempDest);
+                    stack.push("t"+tempDest);
                 } else if(token.equals("/")) {
                     //Make atoms
-                    createDIV(a, b, "L"+(++tempDest));
+                    createDIV(a, b, "t"+(++tempDest));
                     //push temp var on stack
-                    stack.push("L"+tempDest);
+                    stack.push("t"+tempDest);
                 }
             } else {
                 //At the end of the expression and there is one more operand in stack, move into the original destination
@@ -498,6 +498,9 @@ public class Parse{
         if (index >= length) {
             return "ACCEPT";
         }
+        else if(peak(17)){
+            return "ACCEPT";
+        }//}
 
         //FOR CASE
         if (accept(32)) {
@@ -510,6 +513,9 @@ public class Parse{
         if (index >= length) {
             return "ACCEPT";
         }
+        else if(peak(17)){
+            return "ACCEPT";
+        }//}
 
         //WHILE CASE
         if(accept(33)){
@@ -522,36 +528,36 @@ public class Parse{
         if (index >= length) {
             return "ACCEPT";
         }
+        else if(peak(17)){
+            return "ACCEPT";
+        }//}
 
         //ASSIGNMENT CASE
         //int_type or float_type or identifier
         if(peak(37) || peak(38) || isIdentifier(index)){
             //accept(terminals[index]);      //if token is an identifier or number type, accept it
-
-            String result = Assignment();
             
-            if (result.equals("REJECT")) {
+            if (Assignment().equals("REJECT")) {
                 //Empty atoms
                 decafAtoms.clear();
                 return "REJECT";
             }
-
-            infixToPostfix(mathOps);
-            mathOps.clear();
-
             if(expect(43) == -1){
-                //Empty atoms
-                decafAtoms.clear();
                 return "REJECT";
-            }
-            if(index < length){
+            }//;
+            if(peak(17) || tokens[index] == null){
+                return "ACCEPT";
+            }//} or null
+            else{
                 return Statement();
             }
-            
         }
         if (index >= length) {
             return "ACCEPT";
         }
+        else if(peak(17)){
+            return "ACCEPT";
+        }//}
 
         //Empty atoms
         decafAtoms.clear();
@@ -586,17 +592,29 @@ public class Parse{
         if(expect(16) == -1){
             return "REJECT";
         }//{
-        Statement();
+
+        if(Statement().equals("REJECT")){
+            return "REJECT";
+        }
+        
+        if(expect(17) == -1){
+            return "REJECT";
+        }  //}
 
         //Add decaf
         createJMP(lblNumber);
        
-        
-        if(expect(17) == -1){
-            return "REJECT";
-        }//}
         //Add decaf
         createLBL(lblNumberJMP);
+
+        if(peak(17)){
+            return "ACCEPT";
+        }//}
+
+        if(index < length){
+            return Statement();
+        }
+
         return "ACCEPT";
     }
 
@@ -615,14 +633,11 @@ public class Parse{
         if(expect(18) == -1){
             return "REJECT";
         }  //(
+
         res = Assignment();     //ex: i = 0
-        //Add atoms
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
         } //;
-
-        infixToPostfix(mathOps);
-        mathOps.clear();
 
         lbl++;
         int lblNumber = lbl;
@@ -634,30 +649,38 @@ public class Parse{
         if(expect(43) == -1 || res.equals("REJECT")){
             return "REJECT";
         } //;
-        res = Assignment();   //ex: i = i + 1
+
+        res = Assignment();     //ex: i = i + 1
         if(expect(19) == -1 || res.equals("REJECT")){
             return "REJECT";
-        }  //)
+        } //)
 
-        List<String> temp = new ArrayList<>();
-        temp.addAll(mathOps);
-        mathOps.clear();
-        
         if(expect(16) == -1){
             return "REJECT";
         }  //{
-        Statement();
-
-        System.out.println("POSTFIX: " + temp.toString());
-        infixToPostfix(temp);
         
-        //Add decaf
-        createJMP(lblNumber);
+        if(Statement().equals("REJECT")){
+            return "REJECT";
+        }
+        
         if(expect(17) == -1){
             return "REJECT";
         }  //}
+
+        //Add decaf
+        createJMP(lblNumber);
+       
         //Add decaf
         createLBL(lblNumberJMP);
+
+        if(peak(17)){
+            return "ACCEPT";
+        }//}
+
+        if(index < length){
+            return Statement();
+        }
+
         return "ACCEPT";
     }
 
@@ -688,10 +711,14 @@ public class Parse{
         if(expect(16) == -1){
             return "REJECT";
         } //{
-        Statement();
+        
+        if(Statement().equals("REJECT")){
+            return "REJECT";
+        }
+
         if(expect(17) == -1){
             return "REJECT";
-        } // }
+        }  //}
         
         //Need to create jmp within if block in order to skip elseif/else in the case if is true (basically mimics an if elseif else program)
         lbl++;
@@ -710,6 +737,15 @@ public class Parse{
             Else();
         }
         createLBL(lblNumberJMP);
+
+        if(peak(17)){
+            return "ACCEPT";
+        }//}
+
+        if(index < length){
+            return Statement();
+        }
+
         return "ACCEPT";
     }
 
@@ -725,12 +761,19 @@ public class Parse{
         //{
         if(expect(16) == -1){
             return "REJECT";
-        }
-        Statement();
-        //}
-        if(expect(17) == -1){
+        }//{
+        
+        if(Statement().equals("REJECT")){
             return "REJECT";
         }
+
+        if(expect(17) == -1){
+            return "REJECT";
+        }//}
+
+        if(peak(17)){
+            return "ACCEPT";
+        }//}
 
         //No decaf for else because there is no TST to compliment it
         return "ACCEPT";
@@ -761,7 +804,11 @@ public class Parse{
         if(expect(16) == -1){
             return "REJECT";
         }//{
-        Statement();
+        
+        if(Statement().equals("REJECT")){
+            return "REJECT";
+        }
+
         if(expect(17) == -1){
             return "REJECT";
         }//}
@@ -784,6 +831,11 @@ public class Parse{
             Else();
         }
         createLBL(lblNumberJMP);
+
+        if(peak(17)){
+            return "ACCEPT";
+        }//}
+
         return "ACCEPT";
     }
 
@@ -812,8 +864,8 @@ public class Parse{
                 if(result.equals("REJECT")){
                     return "REJECT";
                 }
-                
-                //expect(41); //float literal
+                infixToPostfix(mathOps);
+                mathOps.clear();
                 return "ACCEPT";
             }
         }
@@ -830,9 +882,8 @@ public class Parse{
                 if(result.equals("REJECT")){
                     return "REJECT";
                 }
-                System.out.println("MATHOPS: " + mathOps.toString());
-                
-                //expect(40); //int literal
+                infixToPostfix(mathOps);
+                mathOps.clear();
                 return "ACCEPT";
             }
         }
@@ -850,20 +901,10 @@ public class Parse{
             if(result.equals("REJECT")){
                 return "REJECT";
             }
-            
+            infixToPostfix(mathOps);
+            mathOps.clear();
             return "ACCEPT";
         }
-        /*
-        else{
-            expect(30);//=
-            if(isOperator(index) != -1)    //check for operator after = (no number/identifer to operate)
-                return "REJECT";
-            //expr
-            if (Expr().equals("ACCEPT")) {
-                return "ACCEPT";
-            }
-        }*/
-        //throw new IllegalArgumentException("Invalid statement");
         return "REJECT";
     }
 
@@ -929,7 +970,12 @@ public class Parse{
                     // return "ACCEPT";//INSERT DECAF
                 }
             }
-            return tokens[index-1];//INSERT DECAF
+            if(mathOps.size() == 1){
+                return tokens[index-1];//INSERT DECAF
+            }
+            else{
+                return "t"+(tempDest+1);
+            }
 
         }
         //float_literal
@@ -946,8 +992,12 @@ public class Parse{
                     // return "ACCEPT";//INSERT DECAF
                 }
             }
-
-            return tokens[index-1];//INSERT DECAF
+            if(mathOps.size() == 1){
+                return tokens[index-1];//INSERT DECAF
+            }
+            else{
+                return "t"+(tempDest+1);
+            }
         }
         
         if(accept(18)){ // ( Expr )
@@ -968,8 +1018,12 @@ public class Parse{
                     // return "ACCEPT";//INSERT DECAF
                 }
             }
-
-            return "ACCEPT";//INSERT DECAF
+            if(mathOps.size() == 3){
+                return tokens[index-2];//INSERT DECAF
+            }
+            else{
+                return "t"+(tempDest+1);
+            }
         }
         mathOps.clear();
         return "REJECT";
@@ -1003,7 +1057,6 @@ public class Parse{
             createTST(lblNumber, left, right, cmp);
             return "ACCEPT";
         }
-        
         return "REJECT";
     }
 }

@@ -1,0 +1,9 @@
+if(x<y){
+    int a = 1;
+}
+elseif(x>y){
+    int a = 2;
+}
+else{
+    int a = 3;
+}
