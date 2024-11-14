@@ -546,9 +546,9 @@ public class Parse{
             if(expect(43) == -1){
                 return "REJECT";
             }//;
-            if(peak(17) || tokens[index] == null){
+            if(peak(17)){
                 return "ACCEPT";
-            }//} or null
+            }//}
             else{
                 return Statement();
             }
@@ -731,11 +731,15 @@ public class Parse{
 
         //ELSE-IF CASE
         if(accept(36)){
-            ElseIf();
+            if(ElseIf().equals("REJECT")){
+                return "REJECT";
+            }
         }
         //ELSE CASE
         else if(accept(35)){
-            Else();
+            if(Else().equals("REJECT")){
+                return "REJECT";
+            }
         }
         createLBL(lblNumberJMP);
 
@@ -825,11 +829,15 @@ public class Parse{
         
         //ELSE-IF CASE
         if(accept(36)){
-            ElseIf();
+            if(ElseIf().equals("REJECT")){
+                return "REJECT";
+            }
         }
         //ELSE CASE
         else if(accept(35)){
-            Else();
+            if(Else().equals("REJECT")){
+                return "REJECT";
+            }
         }
         createLBL(lblNumberJMP);
 
