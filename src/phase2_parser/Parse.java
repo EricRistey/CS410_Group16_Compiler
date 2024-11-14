@@ -28,7 +28,7 @@ public class Parse{
     private String[] tokens;
     private int index;
     private int length;
-    private List<Object[]> decafAtoms;
+    private List<String> decafAtoms;
     private List<String> mathOps;
     private int lbl;
     private int tempDest;
@@ -39,135 +39,71 @@ public class Parse{
     //Compile the files:  javac -d bin src/phase2_parser/Parse.java 
     //Run the program:  java -cp bin phase2_parser.Parse
 
-    public static void main(String[] args) {
-        Parse parser = new Parse();
-        ////FOR TESTS///
-        /// 
-        //For w/ assignment
-        //int[] terminals = new int[]{32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 38, 39, 30, 40, 43, 17};
-        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "int", "test", "=", "10", ";", "}"};
-
-        ///Empty Nested For        
-        //int[] terminals = new int[] {32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 32, 18, 38, 39, 30, 40, 43, 39, 26, 40, 43, 39, 30, 39, 20, 40, 19, 16, 17, 17};
-        //String[] tokens = new String[]{"for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "for", "(", "int", "test", "=", "10", ";", "test", "<", "10", ";", "test", "=", "test", "+", "10", ")", "{", "}", "}"};
-
-        ///REJECT INPUT///
-        
-        //Assignment w/o dividend
-        int[] terminals = new int[]{39, 30, 23, 40, 43};
-        String[] tokens = new String[]{"test", "=", "/", "10", ";"};
-
-        ///WHILE TESTS///
-        
-        /// Empty While
-        //int[] terminals = new int[]{33, 18, 40, 19, 16, 17};
-        //String[] tokens = new String[]{"while", "(", "10", ")", "{", "}"};
-
-        
-        //WHILE w/ assignment
-        //int[] terminals = new int[] {33, 18, 40, 26, 39, 19, 16, 38, 39, 30, 40, 43, 17};
-        //String[] tokens = new String[]{"while", "(", "10", "<", "y", ")", "{", "int", "test", "=", "10", ";", "}"};
-
-        //Nested While
-        //int[] terminals = new int[] {33, 18, 40, 26, 39, 19, 16, 33, 18, 40, 26, 39, 19, 16, 38, 39, 30, 40, 43, 17, 17};
-        //String[] tokens = new String[]{"while", "(", "10", "<", "y", ")", "{", "while", "(", "10", "<", "y", ")", "{", "int", "test", "=", "10", ";", "}", "}"};
-
-        ///IFs///
-        
-        /// Empty If and Elseif 
-        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 17, 36, 18, 39, 28, 40, 19, 16, 17};
-        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "}", "else if", "(", "test", ">", "10", ")", "{", "}"};
-
-        //If else
-            // if ( i < 10 ) { int IDENT = INT_LIT; } else { float IDENT = FLOAT_LIT; }
-        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 38, 39, 30, 40, 43, 17, 35, 16, 37, 39, 30, 41, 43, 17};
-        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "int", "test", "=", "10", ";", "}", "else", "{", "float", "test", "=", "10.0", ";", "}"};
-
-        //Complex if
-            // if ( ( INT_LIT * INT_LIT ) <= ( IDENT + FLOAT_LIT ) ) { IDENT = INT_LIT; }
-        //int[] terminals = new int[] {34, 18, 18, 40, 22, 40, 19, 26, 18, 39, 20, 41, 19, 17, 16, 39, 30, 40, 43, 17};
-        //String[] tokens = new String[]{"if", "(", "(", "10", "*", "10", ")", "<=", "(", "test", "+", "10.0", ")", ")", "{", "test", "=", "10", ";", "}"};
-
-        ///Empty Nested If
-        //int[] terminals = new int[] {34, 18, 39, 26, 40, 19, 16, 34, 18, 39, 28, 40, 19, 16, 17, 17};
-        //String[] tokens = new String[]{"if", "(", "test", "<", "10", ")", "{", "if", "(", "test", ">", "10", ")", "{", "}", "}"};
-
-        ///ASSIGNMENTS///
-                //IDENT = float_literal * ( INT_LIT + INT_LIT );
-        //int[] terminals = new int[] {39, 30, 41, 22, 18, 40, 20, 40, 19, 43};
-        //String[] tokens = new String[]{"test", "=", "10.0", "*", "(", "10", "+", "10", ")", ";"};
-
-        parser.setTerminals(terminals, tokens);
-        String result = parser.Statement();
-
-        System.out.println("RESULT: "+result);
-        parser.printAtoms(parser.decafAtoms);
-    }
-
-    private void printAtoms(List<Object[]> instructions) {
-        for(Object[] atom : instructions) {
-            System.out.println(Arrays.toString(atom));
+    private void printAtoms(List<String> instructions) {
+        for(String atom : instructions) {
+            System.out.println(atom);
         }
     }
 
     public void printAtoms() {
-        for(Object[] atom : decafAtoms) {
-            System.out.println(Arrays.toString(atom));
+        for(String atom : decafAtoms) {
+            System.out.println(atom);
         }
     }
 
     private void createLBL(int lblNumber){
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "LBL, " + ", " + ", " + ", " + ", " + "L"+lblNumber + ")"));
     }
 
     private void createJMP(int lblNumber){
-        decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "JMP, " + ", " + ", " + ", " + ", " + "L"+lblNumber + ")"));
     }
 
     private void createTST(int lblNumber, String left, String right, int cmp){
-        decafAtoms.add(new Object[] {"TST", left, right, "", cmp, "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "TST, " + left+", " + right+", " + ", " + Integer.toString(cmp)+", " + "L"+lblNumber + ")"));
     }
 
     private void createMOV(String token, String a, String dest){
-        decafAtoms.add(new Object[] {"MOV", a, token, dest});
+        decafAtoms.add(new String ("(" + "MOV, " + a+", " + token+", " + dest + ")"));
     }
 
     private void createADD(String a, String b, String dest){
-        if(dest == ""  || dest == null){
+        if("".equals(dest)  || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"ADD", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "ADD, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"ADD", a, b, dest});
+            decafAtoms.add(new String ("(" + "ADD, " + a+", " + b+", " + dest + ")"));
         }
     }
 
     private void createSUB(String a, String b, String dest){
-        if(dest == "" || dest == null){
+        if("".equals(dest) || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"SUB", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "SUB, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"SUB", a, b, dest});
+            decafAtoms.add(new String ("(" + "SUB, " + a+", " + b+", " + dest + ")"));
         }
     }
 
     private void createMUL(String a, String b, String dest){
-        if(dest == "" || dest == null){
+        if("".equals(dest) || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"MUL", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "MUL, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"MUL", a, b, dest});}
+            decafAtoms.add(new String ("(" + "MUL, " + a+", " + b+", " + dest + ")"));
+        }
     }
 
     private void createDIV(String a, String b, String dest){
-        if(dest == "" || dest == null){
+        if("".equals(dest) || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"DIV", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "DIV, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"DIV", a, b, dest});
+            decafAtoms.add(new String ("(" + "DIV, " + a+", " + b+", " + dest + ")"));
         }
     }
 
@@ -252,16 +188,16 @@ public class Parse{
     private void evalPostfix(String[] expression) {
         Stack<String> stack = new Stack<>();
 
-        System.out.println("SIZE: " + expression.length);
-        System.out.println("POST: " + Arrays.toString(expression));
+        //System.out.println("SIZE: " + expression.length);
+        //System.out.println("POST: " + Arrays.toString(expression));
         for(String token : expression) {
-            System.out.println("TOKEN: " + token);
+            //System.out.println("TOKEN: " + token);
             if(!token.equals("+") && !token.equals("-") && !token.equals("*") && !token.equals("/")) {
                 stack.push(token);
             } else if(stack.size() > 1) {
                 String b = stack.pop();
                 String a = stack.pop();
-                System.out.println("AB: " + a + "," + b);
+                //System.out.println("AB: " + a + "," + b);
                 if(token.equals("+")) {
                     //Make atoms
                     createADD(a, b, "t"+(++tempDest));
@@ -286,7 +222,7 @@ public class Parse{
             } else {
                 //At the end of the expression and there is one more operand in stack, move into the original destination
                 String a = stack.pop();
-                System.out.println("AX: " + a);
+                //System.out.println("AX: " + a);
                 //Add decaf
                 createMOV("", a, dest);
             }
@@ -536,7 +472,7 @@ public class Parse{
         //int_type or float_type or identifier
         if(peak(37) || peak(38) || isIdentifier(index)){
             //accept(terminals[index]);      //if token is an identifier or number type, accept it
-            
+            System.out.println();
             if (Assignment().equals("REJECT")) {
                 //Empty atoms
                 decafAtoms.clear();
@@ -545,9 +481,9 @@ public class Parse{
             if(expect(43) == -1){
                 return "REJECT";
             }//;
-            if(peak(17) || tokens[index] == null){
+            if(peak(17)){
                 return "ACCEPT";
-            }//} or null
+            }//}
             else{
                 return Statement();
             }
@@ -730,11 +666,15 @@ public class Parse{
 
         //ELSE-IF CASE
         if(accept(36)){
-            ElseIf();
+            if(ElseIf().equals("REJECT")){
+                return "REJECT";
+            }
         }
         //ELSE CASE
         else if(accept(35)){
-            Else();
+            if(Else().equals("REJECT")){
+                return "REJECT";
+            }
         }
         createLBL(lblNumberJMP);
 
@@ -819,16 +759,20 @@ public class Parse{
         createJMP(lblNumberJMP);
 
         //Add decaf
-        System.out.println(lbl);
+        //System.out.println(lbl);
         createLBL(lblNumber);
         
         //ELSE-IF CASE
         if(accept(36)){
-            ElseIf();
+            if(ElseIf().equals("REJECT")){
+                return "REJECT";
+            }
         }
         //ELSE CASE
         else if(accept(35)){
-            Else();
+            if(Else().equals("REJECT")){
+                return "REJECT";
+            }
         }
         createLBL(lblNumberJMP);
 

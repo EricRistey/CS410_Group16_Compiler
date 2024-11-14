@@ -1,4 +1,5 @@
 package phase1_scanner;
+import java.io.IOException;
 import java.util.Scanner;
 
 import phase2_parser.Parse;
@@ -62,6 +63,10 @@ public class Scan {
     }
 
     public TokenContainer tokenize(String input){
+
+        System.out.println("_________________________________________________________________");
+        System.out.println("Scanning");
+        System.out.println("_________________________________________________________________");
 
         //States list will contain all final states that the state machine reaches
         int states[] = new int[200];
@@ -221,7 +226,9 @@ public class Scan {
 
         //print final statesif
         print_states(states, accepting_states, states_string);
-
+        System.out.println("_________________________________________________________________");
+        System.out.println("PARSING");
+        System.out.println("_________________________________________________________________");
         //Create new Parse object
         Parse parse = new Parse(states, states_string, j);
 
@@ -237,7 +244,7 @@ public class Scan {
         //else :  if(x<y){}else{}
         //For :  for(int x=5;x<10;x=x+1){}
         //While :  while(x<y){}
-        if(parseResult != "REJECT"){
+        if(!"REJECT".equals(parseResult)){
             parse.printAtoms();
         }
     };
@@ -317,7 +324,7 @@ public class Scan {
                     return fileContents.toString();
                 }
             }
-            catch(Exception e){
+            catch(IOException e){
                 System.out.println("File does not exist." + e);
             }
         }
