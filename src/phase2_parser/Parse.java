@@ -28,7 +28,7 @@ public class Parse{
     private String[] tokens;
     private int index;
     private int length;
-    private List<Object[]> decafAtoms;
+    private List<String> decafAtoms;
     private List<String> mathOps;
     private int lbl;
     private int tempDest;
@@ -104,70 +104,71 @@ public class Parse{
         parser.printAtoms(parser.decafAtoms);
     }
 
-    private void printAtoms(List<Object[]> instructions) {
-        for(Object[] atom : instructions) {
-            System.out.println(Arrays.toString(atom));
+    private void printAtoms(List<String> instructions) {
+        for(String atom : instructions) {
+            System.out.println(atom);
         }
     }
 
     public void printAtoms() {
-        for(Object[] atom : decafAtoms) {
-            System.out.println(Arrays.toString(atom));
+        for(String atom : decafAtoms) {
+            System.out.println(atom);
         }
     }
 
     private void createLBL(int lblNumber){
-        decafAtoms.add(new Object[] {"LBL", "", "", "", "", "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "LBL, " + ", " + ", " + ", " + ", " + "L"+lblNumber + ")"));
     }
 
     private void createJMP(int lblNumber){
-        decafAtoms.add(new Object[] {"JMP", "", "", "", "", "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "JMP, " + ", " + ", " + ", " + ", " + "L"+lblNumber + ")"));
     }
 
     private void createTST(int lblNumber, String left, String right, int cmp){
-        decafAtoms.add(new Object[] {"TST", left, right, "", cmp, "L"+lblNumber});
+        decafAtoms.add(new String ("(" + "TST, " + left+", " + right+", " + ", " + Integer.toString(cmp)+", " + "L"+lblNumber + ")"));
     }
 
     private void createMOV(String token, String a, String dest){
-        decafAtoms.add(new Object[] {"MOV", a, token, dest});
+        decafAtoms.add(new String ("(" + "MOV, " + a+", " + token+", " + dest + ")"));
     }
 
     private void createADD(String a, String b, String dest){
         if(dest == ""  || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"ADD", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "ADD, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"ADD", a, b, dest});
+            decafAtoms.add(new String ("(" + "ADD, " + a+", " + b+", " + dest + ")"));
         }
     }
 
     private void createSUB(String a, String b, String dest){
         if(dest == "" || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"SUB", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "SUB, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"SUB", a, b, dest});
+            decafAtoms.add(new String ("(" + "SUB, " + a+", " + b+", " + dest + ")"));
         }
     }
 
     private void createMUL(String a, String b, String dest){
         if(dest == "" || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"MUL", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "MUL, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"MUL", a, b, dest});}
+            decafAtoms.add(new String ("(" + "MUL, " + a+", " + b+", " + dest + ")"));
+        }
     }
 
     private void createDIV(String a, String b, String dest){
         if(dest == "" || dest == null){
             tempDest++;
-            decafAtoms.add(new Object[] {"DIV", a, b, "t"+tempDest});
+            decafAtoms.add(new String ("(" + "DIV, " + a+", " + b+", " + "t"+tempDest + ")"));
         }
         else{
-            decafAtoms.add(new Object[] {"DIV", a, b, dest});
+            decafAtoms.add(new String ("(" + "DIV, " + a+", " + b+", " + dest + ")"));
         }
     }
 
