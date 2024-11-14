@@ -48,8 +48,6 @@ public class ParseTest {
         encoding.put(";", 43);
     }
 
-    
-
     private int[] encodeTerminals(String[] terminals) { //encode the test tokens using the encoding hashmap
         int[] encoded = new int[terminals.length];
         for (int i = 0; i < terminals.length; i++) {
@@ -58,7 +56,6 @@ public class ParseTest {
         return encoded;
     }
 
-
     @Before
     public void setUp() {
         initEncoding();
@@ -66,6 +63,7 @@ public class ParseTest {
         System.setOut(new PrintStream(outContent));
     }
 
+    
     @Test
     public void testInvalidAssignmentWithOperator() {
         // IDENT = + INT_LIT;
