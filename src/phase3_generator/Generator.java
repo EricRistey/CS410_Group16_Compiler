@@ -66,6 +66,7 @@ public class Generator {
                     //REGISTER
                     stream.write((byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         stream.write((byte)mem);
@@ -83,6 +84,7 @@ public class Generator {
                     //REGISTER
                     stream.write((byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         stream.write((byte)mem);
@@ -100,6 +102,7 @@ public class Generator {
                     //REGISTER
                     stream.write((byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         stream.write((byte)mem);
@@ -117,6 +120,7 @@ public class Generator {
                     //REGISTER
                     stream.write((byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         stream.write((byte)mem);
@@ -135,6 +139,7 @@ public class Generator {
                     //REGISTER (none for JMP)
                     stream.write((byte)0);
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
+                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[5].startsWith("L")) {
                         int mem = Integer.parseInt(split[5].substring(1))+1000;
                         stream.write((byte)0);
