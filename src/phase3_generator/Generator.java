@@ -1,6 +1,7 @@
 package phase3_generator;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.List;
 
 public class Generator {
@@ -39,10 +40,13 @@ public class Generator {
     private int pc;
     private byte[][] result;
 
+    private HashMap<String, Integer> label_map;
+
     public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.flag = false;
-        this.pc = 0;
+        this.pc = 100;
+        this.label_map = new HashMap<String, Integer>();
     }
 
     public void printInstructions() {
@@ -53,6 +57,11 @@ public class Generator {
             }
             System.out.println();
         }
+    }
+
+    private void writeByteToStream(ByteArrayOutputStream stream, byte b){
+        stream.write(b);
+        this.pc+=4;
     }
 
     public byte[][] atomsToBinary() {
@@ -74,15 +83,20 @@ public class Generator {
             switch (split[0]) {
                 case "ADD":
                     //OP CODE
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //CMP (none for ADD)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);    
+
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
                         System.out.println("Invalid instruction (ADD)");
@@ -91,15 +105,19 @@ public class Generator {
                     break;
                 case "SUB":
                     //OP CODE
-                    stream.write((byte)2);
+                    // stream.write((byte)2);
+                    writeByteToStream(stream, (byte)2);
                     //CMP (none for SUB)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
                         System.out.println("Invalid instruction (SUB)");
@@ -108,15 +126,19 @@ public class Generator {
                     break;
                 case "MUL":
                     //OP CODE
-                    stream.write((byte)3);
+                    // stream.write((byte)3);
+                    writeByteToStream(stream, (byte)3);
                     //CMP (none for MUL)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
                         System.out.println("Invalid instruction (MUL)");
@@ -125,15 +147,19 @@ public class Generator {
                     break;
                 case "DIV":
                     //OP CODE
-                    stream.write((byte)4);
+                    // stream.write((byte)4);
+                    writeByteToStream(stream, (byte)4);
                     //CMP (none for DIV)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
                         System.out.println("Invalid instruction (DIV)");
@@ -143,16 +169,21 @@ public class Generator {
                 case "JMP":
                     if(!flag) break;
                     //OP CODE
-                    stream.write((byte)5);
+                    // stream.write((byte)5);
+                    writeByteToStream(stream, (byte)5);
                     //CMP (none for JMP)
-                    stream.write((byte)0);
-                    //REGISTER (none for JMP)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
+                    // //REGISTER (none for JMP)
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
                     if(split[5].startsWith("L")) {
                         int mem = Integer.parseInt(split[5].substring(1))+1000;
-                        stream.write((byte)0);
-                        stream.write((byte)mem);
+                        // stream.write((byte)0);
+                        writeByteToStream(stream, (byte)0);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
                         System.out.println("Invalid instruction (JMP)");
@@ -160,15 +191,20 @@ public class Generator {
                     }
                     break;
                 case "LBL":
-                    //TODO fill in the rest for LBL
-                    break;
+                    //add label to map
+                    String name = split[5];
+                    label_map.put(name, pc);
+                    //no need to increment pc since there is no instruction
+
                 case "TST":
-                    stream.write((byte)6);
+                    // stream.write((byte)6);
+                    writeByteToStream(stream, (byte)6);
                     //TODO fill in the rest for TST
                     break;
                 case "MOV":
                     //STO (7) or LOD (8)
-                    stream.write((byte)7);
+                    // stream.write((byte)7);
+                    writeByteToStream(stream, (byte)7);
                     //TODO fill in the rest for LOD
                     break;
                 default:
