@@ -1,6 +1,7 @@
 package phase3_generator;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class Generator {
     /*
@@ -33,23 +34,36 @@ public class Generator {
      *  (JMP, , , , , L1) => 
      *  (TST, 11, t0, , 4, L0) => 
      */
-    private String[] atoms;
+    private List<String> atoms;
     private boolean flag;
     private int pc;
-    public Generator(String[] atoms) {
+    private byte[][] result;
+
+    public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.flag = false;
         this.pc = 0;
     }
-    private byte[][] atomsToBinary() {
-        byte[][] result = new byte[atoms.length][8];
+
+    public void printInstructions() {
+        for(int i = 0; i < result.length; i++){
+            System.out.print(i + ". ");
+            for(int j = 0; j < result[i].length; j++){
+                System.out.print(result[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    public byte[][] atomsToBinary() {
+        result = new byte[atoms.size()][8];
         //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
-        for(int i = 0; i < atoms.length; i++) {
+        for(int i = 0; i < atoms.size(); i++) {
             //Read each atom
             //Split (ADD, test, 10, t0) on commas and leave parenthesis out
             //Remove parenthesis
-            atoms[i] = atoms[i].replace("(", "");
-            String[] split = atoms[i].split(",");
+            String atom = atoms.get(i).replace("(", "").replace(")", "");
+            String[] split = atom.split(",");
             for(int j = 0; j < split.length; j++) {
                 split[j] = split[j].trim();
             }
@@ -71,7 +85,7 @@ public class Generator {
                         stream.write((byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (ADD)");
                         System.exit(-1);
                     }
                     break;
@@ -88,7 +102,7 @@ public class Generator {
                         stream.write((byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (SUB)");
                         System.exit(-1);
                     }
                     break;
@@ -105,7 +119,7 @@ public class Generator {
                         stream.write((byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (MUL)");
                         System.exit(-1);
                     }
                     break;
@@ -122,7 +136,7 @@ public class Generator {
                         stream.write((byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (DIV)");
                         System.exit(-1);
                     }
                     break;
@@ -141,28 +155,24 @@ public class Generator {
                         stream.write((byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (JMP)");
                         System.exit(-1);
                     }
+                    break;
+                case "LBL":
+                    //TODO fill in the rest for LBL
                     break;
                 case "TST":
                     stream.write((byte)6);
                     //TODO fill in the rest for TST
                     break;
-                case "LOD":
+                case "MOV":
+                    //STO (7) or LOD (8)
                     stream.write((byte)7);
                     //TODO fill in the rest for LOD
                     break;
-                case "STO":
-                    stream.write((byte)8);
-                    //TODO fill in the rest for STO
-                    break;
-                case "HLT":
-                    stream.write((byte)9);
-                    //TODO fill in the rest for HLT
-                    break;
                 default:
-                    System.out.println("Invalid instruction");
+                    System.out.println("Invalid instruction (default)");
                     System.exit(-1);
                     break;
             }

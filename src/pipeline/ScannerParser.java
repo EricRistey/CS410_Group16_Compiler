@@ -2,6 +2,7 @@ package pipeline;
 import phase1_scanner.Scan;
 import phase1_scanner.TokenContainer;
 import phase2_parser.Parse;
+import phase3_generator.Generator;
 
 public class ScannerParser {
 
@@ -29,6 +30,10 @@ public class ScannerParser {
             parse.printAtoms();
         }
 
+        //Generator
+        Generator gen = new Generator(parse.getAtoms());
+        gen.atomsToBinary();
+        gen.printInstructions();
     }
     
 }
