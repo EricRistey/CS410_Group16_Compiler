@@ -41,12 +41,14 @@ public class Generator {
     private byte[][] result;
 
     private HashMap<String, Integer> label_map;
+    private HashMap<Integer, String> fixup_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.flag = false;
         this.pc = 100;
         this.label_map = new HashMap<String, Integer>();
+        this.fixup_map = new HashMap<Integer, String>();
     }
 
     public void printInstructions() {
@@ -178,12 +180,17 @@ public class Generator {
                     // stream.write((byte)0);
                     writeByteToStream(stream, (byte)0);
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
-                    if(split[5].startsWith("L")) {
-                        int mem = Integer.parseInt(split[5].substring(1))+1000;
-                        // stream.write((byte)0);
-                        writeByteToStream(stream, (byte)0);
-                        // stream.write((byte)mem);
-                        writeByteToStream(stream, (byte)mem);
+                    String label = split[5];
+                    if(label.startsWith("L")) {
+                        if (label_map.containsKey(label)) {     //check if the cooresponding label exists in the table
+                            int mem = label_map.get(label);     //get the memory address of the label
+                            writeByteToStream(stream, (byte)mem);
+                        }
+                        else {
+                            fixup_map.put(pc, label);       //if the label does not exist, add it to the fixup table
+                            writeByteToStream(stream, (byte)0);
+                        }
+
                     }
                     else {
                         System.out.println("Invalid instruction (JMP)");
@@ -191,7 +198,7 @@ public class Generator {
                     }
                     break;
                 case "LBL":
-                    //add label to map
+                    //When a LBL atom is encountered enter it in the label table.
                     String name = split[5];
                     label_map.put(name, pc);
                     //no need to increment pc since there is no instruction
