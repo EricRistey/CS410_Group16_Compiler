@@ -51,6 +51,10 @@ public class Parse{
         }
     }
 
+    public List<String> getAtoms() {
+        return decafAtoms;
+    }
+
     private void createLBL(int lblNumber){
         decafAtoms.add(new String ("(" + "LBL, " + ", " + ", " + ", " + ", " + "L"+lblNumber + ")"));
     }

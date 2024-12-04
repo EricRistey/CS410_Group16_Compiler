@@ -1,6 +1,8 @@
 package phase3_generator;
 
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.List;
 
 public class Generator {
     /*
@@ -33,23 +35,46 @@ public class Generator {
      *  (JMP, , , , , L1) => 
      *  (TST, 11, t0, , 4, L0) => 
      */
-    private String[] atoms;
+    private List<String> atoms;
     private boolean flag;
     private int pc;
-    public Generator(String[] atoms) {
+    private byte[][] result;
+
+    private HashMap<String, Integer> label_map;
+    private HashMap<Integer, String> fixup_map;
+
+    public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.flag = false;
-        this.pc = 0;
+        this.pc = 100;
+        this.label_map = new HashMap<String, Integer>();
+        this.fixup_map = new HashMap<Integer, String>();
     }
-    private byte[][] atomsToBinary() {
-        byte[][] result = new byte[atoms.length][8];
+
+    public void printInstructions() {
+        for(int i = 0; i < result.length; i++){
+            System.out.print(i + ". ");
+            for(int j = 0; j < result[i].length; j++){
+                System.out.print(result[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    private void writeByteToStream(ByteArrayOutputStream stream, byte b){
+        stream.write(b);
+        this.pc+=4;
+    }
+
+    public byte[][] atomsToBinary() {
+        result = new byte[atoms.size()][8];
         //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
-        for(int i = 0; i < atoms.length; i++) {
+        for(int i = 0; i < atoms.size(); i++) {
             //Read each atom
             //Split (ADD, test, 10, t0) on commas and leave parenthesis out
             //Remove parenthesis
-            atoms[i] = atoms[i].replace("(", "");
-            String[] split = atoms[i].split(",");
+            String atom = atoms.get(i).replace("(", "").replace(")", "");
+            String[] split = atom.split(",");
             for(int j = 0; j < split.length; j++) {
                 split[j] = split[j].trim();
             }
@@ -60,114 +85,141 @@ public class Generator {
             switch (split[0]) {
                 case "ADD":
                     //OP CODE
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //CMP (none for ADD)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);    
+
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (ADD)");
                         System.exit(-1);
                     }
                     break;
                 case "SUB":
                     //OP CODE
-                    stream.write((byte)2);
+                    // stream.write((byte)2);
+                    writeByteToStream(stream, (byte)2);
                     //CMP (none for SUB)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (SUB)");
                         System.exit(-1);
                     }
                     break;
                 case "MUL":
                     //OP CODE
-                    stream.write((byte)3);
+                    // stream.write((byte)3);
+                    writeByteToStream(stream, (byte)3);
                     //CMP (none for MUL)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (MUL)");
                         System.exit(-1);
                     }
                     break;
                 case "DIV":
                     //OP CODE
-                    stream.write((byte)4);
+                    // stream.write((byte)4);
+                    writeByteToStream(stream, (byte)4);
                     //CMP (none for DIV)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    stream.write((byte)1);
+                    // stream.write((byte)1);
+                    writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+                        writeByteToStream(stream, (byte)mem);
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (DIV)");
                         System.exit(-1);
                     }
                     break;
                 case "JMP":
                     if(!flag) break;
                     //OP CODE
-                    stream.write((byte)5);
+                    // stream.write((byte)5);
+                    writeByteToStream(stream, (byte)5);
                     //CMP (none for JMP)
-                    stream.write((byte)0);
-                    //REGISTER (none for JMP)
-                    stream.write((byte)0);
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
+                    // //REGISTER (none for JMP)
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
-                    //!!!!!!CHANGE TO USE LABEL TABLE
-                    if(split[5].startsWith("L")) {
-                        int mem = Integer.parseInt(split[5].substring(1))+1000;
-                        stream.write((byte)0);
-                        stream.write((byte)mem);
+                    String label = split[5];
+                    if(label.startsWith("L")) {
+                        if (label_map.containsKey(label)) {     //check if the cooresponding label exists in the table
+                            int mem = label_map.get(label);     //get the memory address of the label
+                            writeByteToStream(stream, (byte)mem);
+                        }
+                        else {
+                            fixup_map.put(pc, label);       //if the label does not exist, add it to the fixup table
+                            writeByteToStream(stream, (byte)0);
+                        }
+
                     }
                     else {
-                        System.out.println("Invalid instruction");
+                        System.out.println("Invalid instruction (JMP)");
                         System.exit(-1);
                     }
                     break;
+                case "LBL":
+                    //When a LBL atom is encountered enter it in the label table.
+                    String name = split[5];
+                    label_map.put(name, pc);
+                    //no need to increment pc since there is no instruction
+
                 case "TST":
-                    stream.write((byte)6);
+                    // stream.write((byte)6);
+                    writeByteToStream(stream, (byte)6);
                     //TODO fill in the rest for TST
                     break;
-                case "LOD":
-                    stream.write((byte)7);
+                case "MOV":
+                    //STO (7) or LOD (8)
+                    // stream.write((byte)7);
+                    writeByteToStream(stream, (byte)7);
                     //TODO fill in the rest for LOD
                     break;
-                case "STO":
-                    stream.write((byte)8);
-                    //TODO fill in the rest for STO
-                    break;
-                case "HLT":
-                    stream.write((byte)9);
-                    //TODO fill in the rest for HLT
-                    break;
                 default:
-                    System.out.println("Invalid instruction");
+                    System.out.println("Invalid instruction (default)");
                     System.exit(-1);
                     break;
             }
