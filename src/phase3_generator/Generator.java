@@ -41,14 +41,16 @@ public class Generator {
     private byte[][] result;
 
     private HashMap<String, Integer> label_map;
-    private HashMap<Integer, String> fixup_map;
+    private HashMap<String, Integer> fixup_map;
+    private HashMap<String, Integer> index_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.flag = false;
         this.pc = 100;
         this.label_map = new HashMap<String, Integer>();
-        this.fixup_map = new HashMap<Integer, String>();
+        this.fixup_map = new HashMap<String, Integer>();
+        this.index_map = new HashMap<String, Integer>();
     }
 
     public void printInstructions() {
@@ -63,13 +65,28 @@ public class Generator {
 
     private void writeByteToStream(ByteArrayOutputStream stream, byte b){
         stream.write(b);
-        this.pc+=4;
+        //this.pc+=4;
     }
 
     public byte[][] atomsToBinary() {
         result = new byte[atoms.size()][8];
+
         //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
         for(int i = 0; i < atoms.size(); i++) {
+
+            //If LBL is in fix_up table, and not in the label table, then skip instruction
+            if(!fixup_map.isEmpty()){
+                //Get certain Label
+                int index = atoms.lastIndexOf(atoms.get(i));
+                if(index != -1) {
+                    String label = atoms.get(i).substring(index-3, index-1);
+                    if(fixup_map.containsKey(label) && !label_map.containsKey(label)) {
+                        continue;
+                    }
+                }
+            }
+
+
             //Read each atom
             //Split (ADD, test, 10, t0) on commas and leave parenthesis out
             //Remove parenthesis
@@ -95,11 +112,11 @@ public class Generator {
                     writeByteToStream(stream, (byte)1);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
+                        pc+=4;
                     }
                     else {
                         System.out.println("Invalid instruction (ADD)");
@@ -117,11 +134,11 @@ public class Generator {
                     // stream.write((byte)1);
                     writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
+                        pc+=4;
                     }
                     else {
                         System.out.println("Invalid instruction (SUB)");
@@ -139,11 +156,11 @@ public class Generator {
                     // stream.write((byte)1);
                     writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
+                        pc+=4;
                     }
                     else {
                         System.out.println("Invalid instruction (MUL)");
@@ -161,11 +178,11 @@ public class Generator {
                     // stream.write((byte)1);
                     writeByteToStream(stream, (byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    //!!!!!!CHANGE TO USE LABEL TABLE
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
+                        pc+=4;
                     }
                     else {
                         System.out.println("Invalid instruction (DIV)");
@@ -173,7 +190,6 @@ public class Generator {
                     }
                     break;
                 case "JMP":
-                    if(!flag) break;
                     //OP CODE
                     // stream.write((byte)5);
                     writeByteToStream(stream, (byte)5);
@@ -189,9 +205,12 @@ public class Generator {
                         if (label_map.containsKey(label)) {     //check if the cooresponding label exists in the table
                             int mem = label_map.get(label);     //get the memory address of the label
                             writeByteToStream(stream, (byte)mem);
+                            
+                            pc = fixup_map.get(label); //pc becomes the memory address of the label from fixup table because that is the next execution
+                            i = index_map.get(label)-1; //Change i to get the instructions from LBL and on to execute again minus 1 because for loop increments after each iteration
                         }
                         else {
-                            fixup_map.put(pc, label);       //if the label does not exist, add it to the fixup table
+                            fixup_map.put(label, pc);       //if the label does not exist, add it to the fixup table
                             writeByteToStream(stream, (byte)0);
                         }
 
@@ -204,9 +223,13 @@ public class Generator {
                 case "LBL":
                     //When a LBL atom is encountered enter it in the label table.
                     String name = split[5];
+                    if(label_map.containsKey(name)) {
+                        break; // Label is already in table
+                    }
                     label_map.put(name, pc);
+                    index_map.put(name, i); // Note the index of the label to use for jumping to instructions
                     //no need to increment pc since there is no instruction
-
+                    break;
                 case "TST":
                     // stream.write((byte)6);
                     writeByteToStream(stream, (byte)6);
@@ -226,6 +249,7 @@ public class Generator {
             //Convert each atom to binary
             result[i] = stream.toByteArray();
             //result[i] = (byte)Integer.parseInt(atoms[i], 2);
+            
         }
         return result;
     }

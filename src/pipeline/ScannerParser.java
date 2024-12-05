@@ -1,4 +1,5 @@
 package pipeline;
+import java.util.Scanner;
 import phase1_scanner.Scan;
 import phase1_scanner.TokenContainer;
 import phase2_parser.Parse;
@@ -8,8 +9,10 @@ public class ScannerParser {
 
     public static void main(String[] args) {
         Scan scanner = new Scan();
-        TokenContainer tokens = scanner.scan("src/pipeline/test.c");
-
+        Scanner file = new Scanner(System.in);
+        String fileName = file.nextLine();
+        TokenContainer tokens = scanner.scan(fileName);//"src/pipeline/test.c"
+        file.close();
         //Create new Parse object
         Parse parse = new Parse(tokens.states, tokens.states_string, tokens.length);
 
@@ -35,5 +38,4 @@ public class ScannerParser {
         gen.atomsToBinary();
         gen.printInstructions();
     }
-    
 }
