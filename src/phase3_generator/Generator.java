@@ -94,8 +94,10 @@ public class Generator {
             String[] split = atom.split(",");
             for(int j = 0; j < split.length; j++) {
                 split[j] = split[j].trim();
+                System.out.print(split[j]);
             }
-            
+            System.out.println();
+           
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
             //Find Op Code
@@ -231,8 +233,16 @@ public class Generator {
                     //no need to increment pc since there is no instruction
                     break;
                 case "TST":
+                    // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
+                    //OP CODE for CMP
                     // stream.write((byte)6);
                     writeByteToStream(stream, (byte)6);
+                    //CMP (none for JMP)
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
+                    // //REGISTER (none for JMP)
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //TODO fill in the rest for TST
                     break;
                 case "MOV":
