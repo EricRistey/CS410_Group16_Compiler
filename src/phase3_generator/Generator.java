@@ -39,6 +39,9 @@ public class Generator {
     private int pc;
     private int registerCounter;
     private byte[][] result;
+    private boolean labelFlag;
+    private int labelCounter;
+    private int instructionCounter;
 
     private HashMap<String, Integer> label_map;
     private HashMap<String, Integer> fixup_map;
@@ -48,6 +51,9 @@ public class Generator {
         this.pc = 100;
         registerCounter = 1;
         this.label_map = new HashMap<String, Integer>();
+        labelFlag = false;
+        labelCounter = 0;
+        instructionCounter = 0;
     }
 
     public void printInstructions() {
@@ -66,9 +72,9 @@ public class Generator {
     }
 
     public byte[][] atomsToMachineCode() {
-        result = new byte[atoms.size()][8];
-
+        
         createLabelTable(atoms);
+        result = new byte[(atoms.size()-labelCounter)][8];
     
         //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
         for(int i = 0; i < atoms.size(); i++) {
@@ -214,13 +220,7 @@ public class Generator {
                     }
                     break;
                 case "LBL":
-                    //LABELS ARE ALWAYS IN LABEL TABLE
-                    //String name = split[5];
-                    //if(label_map.containsKey(name)) {
-                    //    break; // Label is already in table
-                    //}
-                    //label_map.put(name, pc);
-                    //no need to increment pc since there is no instruction
+                    labelFlag = true;
                     break;
                 case "TST":
                     // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
@@ -252,9 +252,15 @@ public class Generator {
                     System.exit(-1);
                     break;
             }
-            //Convert each atom to binary
-            result[i] = stream.toByteArray();
-            //result[i] = (byte)Integer.parseInt(atoms[i], 2);
+
+            //Do not want to add empty instructions (LBL case)
+            if(labelFlag != true){
+                //Convert each atom to binary
+                result[instructionCounter] = stream.toByteArray();
+                instructionCounter+=1;
+                //result[i] = (byte)Integer.parseInt(atoms[i], 2);
+            }
+            labelFlag = false;
         }
         return result;
     }
@@ -274,6 +280,7 @@ public class Generator {
                 if(label_map.containsKey(name)) {
                     break; // Label is already in table
                 }
+                labelCounter+=1;
                 label_map.put(name, pc);
                 continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
