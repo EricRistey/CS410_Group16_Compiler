@@ -44,12 +44,14 @@ public class Generator {
     private int instructionCounter;
 
     private HashMap<String, Integer> label_map;
+    private HashMap<String, Integer> address_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
-        this.pc = 100;
+        pc = 100;
         registerCounter = 1;
-        this.label_map = new HashMap<String, Integer>();
+        label_map = new HashMap<String, Integer>();
+        address_map = new HashMap<String, Integer>();
         labelFlag = false;
         labelCounter = 0;
         instructionCounter = 0;
@@ -69,9 +71,40 @@ public class Generator {
         }
     }
 
+    private byte[] getLoadInstruction(int r, int a){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //OP CODE for STO
+        stream.write((byte)7);
+        //CMP (none for STO)
+        stream.write((byte)0);
+        // //REGISTER
+        stream.write((byte)r);
+        //MEMORY ADDRESS
+        stream.write((byte)a);
+        return stream.toByteArray();
+
+    }
+
+    private byte[] getStoreInstruction(int r, int a){
+        //NOT FINISHED
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //OP CODE for STO
+        stream.write((byte)8);
+        //CMP (none for STO)
+        stream.write((byte)0);
+        // //REGISTER
+        stream.write((byte)r);
+        //MEMORY ADDRESS
+        stream.write((byte)a);
+        return stream.toByteArray();
+    }
+
     public byte[][] atomsToMachineCode() {
         //Create label table first
         createLabelTable(atoms);
+        //Create address table
+        createAddressTable(atoms);
+
         result = new byte[(atoms.size()-labelCounter)][8];
 
         for(int i = 0; i < atoms.size(); i++) {
@@ -89,12 +122,56 @@ public class Generator {
             //Find Op Code
             switch (split[0]) {
                 case "ADD":
+                    //(ADD, b, a, <destination>)  --> lod a, r1
+                    //                                lod b, r2
+                    //                                add r1, r2
+                    //                                sto r2, <destination>
+                                    //  opp              a                   b              dest
+                    System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
+
+                    int reg1 = ++registerCounter;   //register for a
+                    int reg2 = ++registerCounter;   //register for b
+
+                    //if a or b are constants, they are not yet stored in memory so we need to store them
+                    if (split [1].matches("-?\\d+")) {
+                        //store the constant in the memory
+                    }
+                    //obtain memory address of a
+                    if (address_map.containsKey(split[1])) {
+                        int mem = address_map.get(split[1]);
+                        for (byte b : getLoadInstruction(reg1, mem)) {
+                            stream.write(b);
+                        }
+                    }
+                    else {
+                        System.out.println("left operand could not be resolved");
+                        System.exit(-1);
+                    }
+
+                    if (split [2].matches("-?\\d+")) {
+                        //store the constant in the memory
+                    }
+                    //obtain memory address of b
+                    if (address_map.containsKey(split[2])) {
+                        int mem = address_map.get(split[2]);
+                        for (byte b : getLoadInstruction(reg2, mem)) {
+                            stream.write(b);
+                        }
+                    }
+                    else {
+                        System.out.println("right operand could not be resolved");
+                        System.exit(-1);
+                    }
+                    
+                    //by this point, we have the memory addresses of a and b in registers r1 and r2
+                    //we can now add them
+
                     //OP CODE
                     stream.write((byte)1);
                     //CMP (none for ADD)
                     stream.write((byte)0);
                     //REGISTER
-                    stream.write((byte)registerCounter);
+                    stream.write((byte)reg1);
                     // writeByteToStream(stream, (byte)registerCounter);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
@@ -215,9 +292,31 @@ public class Generator {
                     stream.write((byte)0);
                     // //REGISTER (none for JMP)
                     stream.write((byte)0);
-                    //TODO fill in the rest for TST
+                    
+                    //print the atom
+                    System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3] + " " + split[4] + " " + split[5]);
+
+                    //resolve label
+                    if (split[5].startsWith("L")) {
+                        if (label_map.containsKey(split[5])) {
+                            int mem = label_map.get(split[5]);
+                            stream.write((byte)mem);
+                        }
+                        else {
+                            System.out.println("Label not found in label table (TST)");
+                            System.exit(-1);
+                        }
+                    }
+                    else {
+                        System.out.println("Invalid Label name (TST)");
+                        System.exit(-1);
+                    }
+
                     break;
                 case "MOV":
+                    //(MOV, <val>, , <dest>) --> lod <val>, r1
+                    //                           sto r1, <dest>
+
                     //OP CODE for STO
                     stream.write((byte)8);
                     //CMP (none for STO)
@@ -242,6 +341,39 @@ public class Generator {
             labelFlag = false;
         }
         return result;
+    }
+
+    private void createAddressTable(List<String> atoms){
+        int curr_address = 0;    // not sure if this is the correct starting address
+
+        for(int i = 0; i < atoms.size(); i++) {
+            if(atoms.get(i).contains("MOV")) {
+                //Split (MOV, 10, , t0) on commas and leave parenthesis out
+                //Remove parenthesis
+                String atom = atoms.get(i).replace("(", "").replace(")", "");
+                String[] split = atom.split(",");
+                for(int j = 0; j < split.length; j++) {
+                    split[j] = split[j].trim();
+                }
+                //When a MOV atom is encountered enter it in the address table.
+                String name = split[3];
+                if(address_map.containsKey(name)) {
+                    break; // Address is already in table
+                }
+                address_map.put(name, curr_address);
+                curr_address+=1;
+            }
+        }
+
+        //Print address table
+        System.out.println("Address Table: ");
+        System.out.println("----------------------------------------------");
+        for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+        System.out.println("----------------------------------------------");
+        System.out.println();
+
     }
 
     private void createLabelTable(List<String> atoms) {
