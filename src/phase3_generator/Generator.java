@@ -42,6 +42,7 @@ public class Generator {
     private boolean labelFlag;
     private int labelCounter;
     private int instructionCounter;
+    private int variableCounter;
 
     private HashMap<String, Integer> label_map;
     private HashMap<String, Integer> address_map;
@@ -144,17 +145,19 @@ public class Generator {
             switch (split[0]) {
                 case "ADD":
                     //(ADD, b, a, <destination>)  --> lod a, r1
-                    //                                lod b, r2
-                    //                                add r1, r2
-                    //                                sto r2, <destination>
+                    //                                sto b, mR
+                    //                                add r1, mR
+                    //                                sto r1, <destination>
                                     //  opp              a                   b              dest
                     System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
 
                     int reg1 = ++registerCounter;   //register for a
-                    int reg2 = ++registerCounter;   //register for b
+                    // int reg2 = ++registerCounter;   //register for b
+                    int memR = -1;
 
                     //if a or b are constants, they are not yet stored in memory so we need to store them
                     if (split [1].matches("-?\\d+")) {
+                        int val = Integer.parseInt(split[1]);
                         //store the constant in the memory
                     }
                     //obtain memory address of a
@@ -174,10 +177,10 @@ public class Generator {
                     }
                     //obtain memory address of b
                     if (address_map.containsKey(split[2])) {
-                        int mem = address_map.get(split[2]);
-                        for (byte b : getLoadInstruction(reg2, mem)) {
-                            stream.write(b);
-                        }
+                        memR = address_map.get(split[2]);
+                        // for (byte b : getLoadInstruction(reg2, mem)) {
+                        //     stream.write(b);
+                        // }
                     }
                     else {
                         System.out.println("right operand could not be resolved");
@@ -193,6 +196,10 @@ public class Generator {
                     stream.write((byte)0);
                     //REGISTER
                     stream.write((byte)reg1);
+
+                    //MEM (right operand)
+                    stream.write((byte)memR);
+
                     // writeByteToStream(stream, (byte)registerCounter);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
@@ -370,13 +377,14 @@ public class Generator {
     }
 
     private void createAddressTable(List<String> atoms){
-        int curr_address = 0;    // not sure if this is the correct starting address
+        // int curr_address = 0;    // not sure if this is the correct starting address
 
         for(int i = 0; i < atoms.size(); i++) {
+            String atom = atoms.get(i).replace("(", "").replace(")", "");
             if(atoms.get(i).contains("MOV")) {
                 //Split (MOV, 10, , t0) on commas and leave parenthesis out
                 //Remove parenthesis
-                String atom = atoms.get(i).replace("(", "").replace(")", "");
+                atom = atoms.get(i).replace("(", "").replace(")", "");
                 String[] split = atom.split(",");
                 for(int j = 0; j < split.length; j++) {
                     split[j] = split[j].trim();
@@ -386,8 +394,10 @@ public class Generator {
                 if(address_map.containsKey(name)) {
                     break; // Address is already in table
                 }
-                address_map.put(name, curr_address);
-                curr_address+=1;
+                // address_map.put(name, curr_address);
+                // curr_address+=1;
+                address_map.put(name, variableCounter);
+                variableCounter+=1;
             }
         }
 
