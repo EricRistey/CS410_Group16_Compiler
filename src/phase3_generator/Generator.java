@@ -36,21 +36,15 @@ public class Generator {
      *  (TST, 11, t0, , 4, L0) => 
      */
     private List<String> atoms;
-    private boolean flag;
     private int pc;
     private byte[][] result;
 
     private HashMap<String, Integer> label_map;
-    private HashMap<String, Integer> fixup_map;
-    private HashMap<String, Integer> index_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
-        this.flag = false;
         this.pc = 100;
         this.label_map = new HashMap<String, Integer>();
-        this.fixup_map = new HashMap<String, Integer>();
-        this.index_map = new HashMap<String, Integer>();
     }
 
     public void printInstructions() {
@@ -68,23 +62,13 @@ public class Generator {
         //this.pc+=4;
     }
 
-    public byte[][] atomsToBinary() {
+    public byte[][] atomsToMachineCode() {
         result = new byte[atoms.size()][8];
 
+        createLabelTable(atoms);
+    
         //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
         for(int i = 0; i < atoms.size(); i++) {
-
-            //If LBL is in fix_up table, and not in the label table, then skip instruction
-            if(!fixup_map.isEmpty()){
-                //Get certain Label
-                int index = atoms.lastIndexOf(atoms.get(i));
-                if(index != -1) {
-                    String label = atoms.get(i).substring(index-3, index-1);
-                    if(fixup_map.containsKey(label) && !label_map.containsKey(label)) {
-                        continue;
-                    }
-                }
-            }
 
 
             //Read each atom
@@ -192,6 +176,7 @@ public class Generator {
                     }
                     break;
                 case "JMP":
+                    //if (!flag) break;
                     //OP CODE
                     // stream.write((byte)5);
                     writeByteToStream(stream, (byte)5);
@@ -208,12 +193,11 @@ public class Generator {
                             int mem = label_map.get(label);     //get the memory address of the label
                             writeByteToStream(stream, (byte)mem);
                             
-                            pc = fixup_map.get(label); //pc becomes the memory address of the label from fixup table because that is the next execution
-                            i = index_map.get(label)-1; //Change i to get the instructions from LBL and on to execute again minus 1 because for loop increments after each iteration
-                        }
-                        else {
-                            fixup_map.put(label, pc);       //if the label does not exist, add it to the fixup table
-                            writeByteToStream(stream, (byte)0);
+                            pc = label_map.get(label); //pc becomes the memory address of the label from label table because that is the next execution
+}
+                        else {//LABEL ALWAYS IN LABEL TABLE
+                            System.out.println("Invalid instruction (JMP)");
+                            System.exit(-1);
                         }
 
                     }
@@ -223,13 +207,12 @@ public class Generator {
                     }
                     break;
                 case "LBL":
-                    //When a LBL atom is encountered enter it in the label table.
-                    String name = split[5];
-                    if(label_map.containsKey(name)) {
-                        break; // Label is already in table
-                    }
-                    label_map.put(name, pc);
-                    index_map.put(name, i); // Note the index of the label to use for jumping to instructions
+                    //LABELS ARE ALWAYS IN LABEL TABLE
+                    //String name = split[5];
+                    //if(label_map.containsKey(name)) {
+                    //    break; // Label is already in table
+                    //}
+                    //label_map.put(name, pc);
                     //no need to increment pc since there is no instruction
                     break;
                 case "TST":
@@ -262,5 +245,35 @@ public class Generator {
             
         }
         return result;
+    }
+
+    private void createLabelTable(List<String> atoms) {
+        for(int i = 0; i < atoms.size(); i++) {
+            if(atoms.get(i).contains("LBL")) {
+                //Split (LBL, L0) on commas and leave parenthesis out
+                //Remove parenthesis
+                String atom = atoms.get(i).replace("(", "").replace(")", "");
+                String[] split = atom.split(",");
+                for(int j = 0; j < split.length; j++) {
+                    split[j] = split[j].trim();
+                }
+                //When a LBL atom is encountered enter it in the label table.
+                String name = split[1];
+                if(label_map.containsKey(name)) {
+                    break; // Label is already in table
+                }
+                label_map.put(name, pc);
+                //no need to increment pc since there is no instruction
+            }
+            pc+=4;
+        }
+        pc = 100;
+        //Print label table
+        System.out.println("Label Table: ");
+        System.out.println("----------------------------------------------");
+        for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+        System.out.println("----------------------------------------------");
     }
 }
