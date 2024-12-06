@@ -37,14 +37,13 @@ public class Generator {
      */
     private List<String> atoms;
     private int pc;
-    private int registerCounter;
+    private int registerCounter;    
     private byte[][] result;
     private boolean labelFlag;
     private int labelCounter;
     private int instructionCounter;
 
     private HashMap<String, Integer> label_map;
-    private HashMap<String, Integer> fixup_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
@@ -70,20 +69,12 @@ public class Generator {
         }
     }
 
-    private void writeByteToStream(ByteArrayOutputStream stream, byte b){
-        stream.write(b);
-        //this.pc+=4;
-    }
-
     public byte[][] atomsToMachineCode() {
-        
+        //Create label table first
         createLabelTable(atoms);
         result = new byte[(atoms.size()-labelCounter)][8];
-    
-        //#TODO Convert atoms to binary using the machine code instructions from phase 3 file
+
         for(int i = 0; i < atoms.size(); i++) {
-
-
             //Read each atom
             //Split (ADD, test, 10, t0) on commas and leave parenthesis out
             //Remove parenthesis
@@ -99,20 +90,18 @@ public class Generator {
             switch (split[0]) {
                 case "ADD":
                     //OP CODE
-                    // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)1);
+                    stream.write((byte)1);
                     //CMP (none for ADD)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //REGISTER
-                    // stream.write((byte)registerCounter);
-                    writeByteToStream(stream, (byte)registerCounter);    
+                    stream.write((byte)registerCounter);
+                    // writeByteToStream(stream, (byte)registerCounter);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        // stream.write((byte)mem);
-                        writeByteToStream(stream, (byte)mem);
+                        stream.write((byte)mem);
+
                         pc+=4;
                         registerCounter+=1;
                     }
@@ -123,19 +112,17 @@ public class Generator {
                     break;
                 case "SUB":
                     //OP CODE
-                    // stream.write((byte)2);
-                    writeByteToStream(stream, (byte)2);
+                    stream.write((byte)2);
                     //CMP (none for SUB)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //REGISTER
-                    // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)registerCounter);
+                    stream.write((byte)1);
+
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        // stream.write((byte)mem);
-                        writeByteToStream(stream, (byte)mem);
+                        stream.write((byte)mem);
+
                         pc+=4;
                         registerCounter+=1;
                     }
@@ -146,19 +133,17 @@ public class Generator {
                     break;
                 case "MUL":
                     //OP CODE
-                    // stream.write((byte)3);
-                    writeByteToStream(stream, (byte)3);
+                    stream.write((byte)3);
                     //CMP (none for MUL)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //REGISTER
-                    // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)registerCounter);
+                    stream.write((byte)1);
+
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        // stream.write((byte)mem);
-                        writeByteToStream(stream, (byte)mem);
+                        stream.write((byte)mem);
+
                         pc+=4;
                         registerCounter+=1;
                     }
@@ -169,19 +154,17 @@ public class Generator {
                     break;
                 case "DIV":
                     //OP CODE
-                    // stream.write((byte)4);
-                    writeByteToStream(stream, (byte)4);
+                    stream.write((byte)4);
                     //CMP (none for DIV)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //REGISTER
-                    // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)registerCounter);
+                    stream.write((byte)1);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        // stream.write((byte)mem);
-                        writeByteToStream(stream, (byte)mem);
+                        stream.write((byte)mem);
+
                         pc+=4;
                         registerCounter+=1;
                     }
@@ -193,22 +176,22 @@ public class Generator {
                 case "JMP":
                     //if (!flag) break;
                     //OP CODE
-                    // stream.write((byte)5);
-                    writeByteToStream(stream, (byte)5);
+                    stream.write((byte)5);
                     //CMP (none for JMP)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     // //REGISTER (none for JMP)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
+
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
                     String label = split[5];
                     if(label.startsWith("L")) {
                         if (label_map.containsKey(label)) {     //check if the cooresponding label exists in the table
                             int mem = label_map.get(label);     //get the memory address of the label
-                            writeByteToStream(stream, (byte)mem);
+                            stream.write((byte)mem);            //write the memory address to the stream
                             
                             pc = label_map.get(label); //pc becomes the memory address of the label from label table because that is the next execution
+                            //(GREYSON)Not sure if we need to change pc here, The target device may changes its own pc to accomplish the jump
+                            
                         }
                         else {//LABEL ALWAYS IN LABEL TABLE
                             System.out.println("Invalid instruction (JMP)");
@@ -227,26 +210,20 @@ public class Generator {
                 case "TST":
                     // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
                     //OP CODE for CMP
-                    // stream.write((byte)6);
-                    writeByteToStream(stream, (byte)6);
+                    stream.write((byte)6);
                     //CMP (none for JMP)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     // //REGISTER (none for JMP)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //TODO fill in the rest for TST
                     break;
                 case "MOV":
                     //OP CODE for STO
-                    // stream.write((byte)8);
-                    writeByteToStream(stream, (byte)8);
+                    stream.write((byte)8);
                     //CMP (none for STO)
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     // //REGISTER
-                    // stream.write((byte)0);
-                    writeByteToStream(stream, (byte)0);
+                    stream.write((byte)0);
                     //TODO fill in the rest for LOD
                     break;
                 default:
@@ -289,7 +266,8 @@ public class Generator {
             }
             pc+=4;
         }
-        pc = 100;
+        pc = 100;   //reset pc to 100
+
         //Print label table
         System.out.println("Label Table: ");
         System.out.println("----------------------------------------------");
