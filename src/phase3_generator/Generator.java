@@ -37,19 +37,22 @@ public class Generator {
      */
     private List<String> atoms;
     private int pc;
+    private int registerCounter;
     private byte[][] result;
 
     private HashMap<String, Integer> label_map;
+    private HashMap<String, Integer> fixup_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
         this.pc = 100;
+        registerCounter = 1;
         this.label_map = new HashMap<String, Integer>();
     }
 
     public void printInstructions() {
+        System.out.println("Instructions:");
         for(int i = 0; i < result.length; i++){
-            System.out.print(i + ". ");
             for(int j = 0; j < result[i].length; j++){
                 System.out.print(result[i][j]);
             }
@@ -94,8 +97,8 @@ public class Generator {
                     // stream.write((byte)0);
                     writeByteToStream(stream, (byte)0);
                     //REGISTER
-                    // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)1);    
+                    // stream.write((byte)registerCounter);
+                    writeByteToStream(stream, (byte)registerCounter);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
@@ -103,6 +106,7 @@ public class Generator {
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
                         pc+=4;
+                        registerCounter+=1;
                     }
                     else {
                         System.out.println("Invalid instruction (ADD)");
@@ -118,13 +122,14 @@ public class Generator {
                     writeByteToStream(stream, (byte)0);
                     //REGISTER
                     // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)1);
+                    writeByteToStream(stream, (byte)registerCounter);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
                         pc+=4;
+                        registerCounter+=1;
                     }
                     else {
                         System.out.println("Invalid instruction (SUB)");
@@ -140,13 +145,14 @@ public class Generator {
                     writeByteToStream(stream, (byte)0);
                     //REGISTER
                     // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)1);
+                    writeByteToStream(stream, (byte)registerCounter);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
                         pc+=4;
+                        registerCounter+=1;
                     }
                     else {
                         System.out.println("Invalid instruction (MUL)");
@@ -162,13 +168,14 @@ public class Generator {
                     writeByteToStream(stream, (byte)0);
                     //REGISTER
                     // stream.write((byte)1);
-                    writeByteToStream(stream, (byte)1);
+                    writeByteToStream(stream, (byte)registerCounter);
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         // stream.write((byte)mem);
                         writeByteToStream(stream, (byte)mem);
                         pc+=4;
+                        registerCounter+=1;
                     }
                     else {
                         System.out.println("Invalid instruction (DIV)");
@@ -194,7 +201,7 @@ public class Generator {
                             writeByteToStream(stream, (byte)mem);
                             
                             pc = label_map.get(label); //pc becomes the memory address of the label from label table because that is the next execution
-}
+                        }
                         else {//LABEL ALWAYS IN LABEL TABLE
                             System.out.println("Invalid instruction (JMP)");
                             System.exit(-1);
@@ -229,9 +236,15 @@ public class Generator {
                     //TODO fill in the rest for TST
                     break;
                 case "MOV":
-                    //STO (7) or LOD (8)
-                    // stream.write((byte)7);
-                    writeByteToStream(stream, (byte)7);
+                    //OP CODE for STO
+                    // stream.write((byte)8);
+                    writeByteToStream(stream, (byte)8);
+                    //CMP (none for STO)
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
+                    // //REGISTER
+                    // stream.write((byte)0);
+                    writeByteToStream(stream, (byte)0);
                     //TODO fill in the rest for LOD
                     break;
                 default:
@@ -242,7 +255,6 @@ public class Generator {
             //Convert each atom to binary
             result[i] = stream.toByteArray();
             //result[i] = (byte)Integer.parseInt(atoms[i], 2);
-            
         }
         return result;
     }
@@ -258,11 +270,12 @@ public class Generator {
                     split[j] = split[j].trim();
                 }
                 //When a LBL atom is encountered enter it in the label table.
-                String name = split[1];
+                String name = split[5];
                 if(label_map.containsKey(name)) {
                     break; // Label is already in table
                 }
                 label_map.put(name, pc);
+                continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
             }
             pc+=4;
