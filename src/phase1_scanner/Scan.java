@@ -1,8 +1,8 @@
 package phase1_scanner;
 import java.io.IOException;
 import java.util.Scanner;
-
 import phase2_parser.Parse;
+import phase3_generator.Generator;
 
 /*************************************************************
  * Group 16 - Scanner
@@ -247,6 +247,14 @@ public class Scan {
         if(!"REJECT".equals(parseResult)){
             parse.printAtoms();
         }
+        else{
+            return;
+        }
+
+        //Generator
+        Generator gen = new Generator(parse.getAtoms());
+        gen.atomsToMachineCode();
+        gen.printInstructions();
     };
 
     // Method to print final states

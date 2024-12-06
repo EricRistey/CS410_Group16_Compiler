@@ -99,6 +99,27 @@ public class Generator {
         return stream.toByteArray();
     }
 
+    private void writeByteToStream(ByteArrayOutputStream stream, byte b){
+        stream.write(b);
+        //this.pc+=4;
+    }
+
+    private void writeAddress(ByteArrayOutputStream stream, int mem) {
+        int num1 = mem/10000;
+        int num2 = (mem/1000)%10;
+        int num3 = (mem/100)%10;
+        int num4 = (mem/10)%10;
+        int num5 = mem%10;
+
+        System.out.println("NUMBERS: " + num1 + ", " + num2 + ", " + num3 + ", " + num4 + ", " + num5);
+
+        writeByteToStream(stream, (byte)num1);
+        writeByteToStream(stream, (byte)num2);
+        writeByteToStream(stream, (byte)num3);    
+        writeByteToStream(stream, (byte)num4);
+        writeByteToStream(stream, (byte)num5);
+    }
+
     public byte[][] atomsToMachineCode() {
         //Create label table first
         createLabelTable(atoms);
@@ -177,7 +198,8 @@ public class Generator {
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        
+                        writeAddress(stream, mem);
 
                         pc+=4;
                         registerCounter+=1;
@@ -198,7 +220,9 @@ public class Generator {
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+                        // stream.write((byte)mem);
+
+                        writeAddress(stream, mem);
 
                         pc+=4;
                         registerCounter+=1;
@@ -219,7 +243,8 @@ public class Generator {
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
+
+                        writeAddress(stream, mem);
 
                         pc+=4;
                         registerCounter+=1;
@@ -240,8 +265,9 @@ public class Generator {
 
                     if(split[3].startsWith("t")) {
                         int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        stream.write((byte)mem);
 
+                        writeAddress(stream, mem);
+                        
                         pc+=4;
                         registerCounter+=1;
                     }
