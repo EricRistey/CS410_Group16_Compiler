@@ -57,11 +57,15 @@ public class Generator {
     }
 
     public void printInstructions() {
-        System.out.println("Instructions:");
+        int pcTemp = 100;
+        System.out.println("Loc | Instruction");
+        System.out.println("------------------");
         for(int i = 0; i < result.length; i++){
+            System.out.print(pcTemp + " | ");
             for(int j = 0; j < result[i].length; j++){
                 System.out.print(result[i][j]);
             }
+            pcTemp+=4;
             System.out.println();
         }
     }
@@ -87,9 +91,7 @@ public class Generator {
             String[] split = atom.split(",");
             for(int j = 0; j < split.length; j++) {
                 split[j] = split[j].trim();
-                System.out.print(split[j]);
             }
-            System.out.println();
            
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -295,5 +297,6 @@ public class Generator {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
         System.out.println("----------------------------------------------");
+        System.out.println();
     }
 }

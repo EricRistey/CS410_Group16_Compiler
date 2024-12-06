@@ -31,6 +31,7 @@ public class ScannerParser {
 
         if(parseResult != "REJECT"){
             parse.printAtoms();
+            System.out.println();
         }
 
         //Generator
