@@ -35,7 +35,7 @@ public class ScannerParser {
 
         //Generator
         Generator gen = new Generator(parse.getAtoms());
-        gen.atomsToBinary();
+        gen.atomsToMachineCode();
         gen.printInstructions();
     }
 }
