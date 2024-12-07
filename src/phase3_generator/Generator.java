@@ -25,6 +25,7 @@ public class Generator {
      *  JMP PC <- s2 if flag is true: 5
      *  CMP flag <- r1 cmp memory[s2]: 6
      *  LOD fpreg[r1] <- memory[s2]: 7
+     * 
      *  STO memory[s2] <- fpreg[r1]: 8
      *  HLT: 9
      * 
@@ -36,16 +37,17 @@ public class Generator {
      *  (TST, 11, t0, , 4, L0) => 
      */
     private List<String> atoms;
-    private int pc;
-    private int registerCounter;    
+    private int pc;    
     private byte[][] result;
     private boolean labelFlag;
     private int labelCounter;
     private int instructionCounter;
     private int variableCounter;
+    private int registerCounter;
 
     private HashMap<String, Integer> label_map;
     private HashMap<String, Integer> address_map;
+    private HashMap<Integer, Integer> lit_map;
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
@@ -53,9 +55,13 @@ public class Generator {
         registerCounter = 1;
         label_map = new HashMap<String, Integer>();
         address_map = new HashMap<String, Integer>();
+        lit_map = new HashMap<Integer, Integer>();
         labelFlag = false;
         labelCounter = 0;
         instructionCounter = 0;
+
+        result = new byte[100][8];
+
     }
 
     public void printInstructions() {
@@ -63,41 +69,77 @@ public class Generator {
         System.out.println("Loc | Instruction");
         System.out.println("------------------");
         for(int i = 0; i < result.length; i++){
+            if (result[i].length != 0) {
+                if (result[i][0] == (byte)0) {
+                    break;
+                }
+            }
+
             System.out.print(pcTemp + " | ");
+
             for(int j = 0; j < result[i].length; j++){
+
                 System.out.print(result[i][j]);
             }
+
             pcTemp+=4;
             System.out.println();
         }
+
+        for (int i = 0; i < lit_map.size(); i++) {
+            System.out.println("LIT: " + i + " " + lit_map.get(i));
+        }
+
     }
 
-    private byte[] getLoadInstruction(int r, int a){
+    private byte[] writeLoadInstruction(int r, int a){
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        //OP CODE for STO
+        //OP CODE for LOD
         stream.write((byte)7);
-        //CMP (none for STO)
+        //CMP (none for LOD)
         stream.write((byte)0);
         // //REGISTER
         stream.write((byte)r);
         //MEMORY ADDRESS
         stream.write((byte)a);
-        return stream.toByteArray();
 
+        result[instructionCounter++] = stream.toByteArray();
+
+        return stream.toByteArray();
     }
+    // private byte[] getLoadInstructionLit(int r, int a){              //Should there be a serperate function for literals rather than memory addresses?
+                                                                        //for example, the 1 in the cmp slot tells the machine that the number in the "memory address" slot is 
+                                                                        //a literal and not a memory address
+    //     ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    //     //OP CODE for LOD
+    //     stream.write((byte)7);
+    //     //CMP (none for LOD)
+    //     stream.write((byte)1);
+    //     // //REGISTER
+    //     stream.write((byte)r);
+    //     //MEMORY ADDRESS
+    //     stream.write((byte)a);
+    //     return stream.toByteArray();
+    // }
 
-    private byte[] getStoreInstruction(int r, int a){
+    private byte[] writeStoreInstruction(int r, String name){
+        address_map.put(name, variableCounter);
+        variableCounter+=1;
+
         //NOT FINISHED
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ByteArrayOutputStream instruction_stream = new ByteArrayOutputStream();
         //OP CODE for STO
-        stream.write((byte)8);
+        instruction_stream.write((byte)8);
         //CMP (none for STO)
-        stream.write((byte)0);
+        instruction_stream.write((byte)0);
         // //REGISTER
-        stream.write((byte)r);
+        instruction_stream.write((byte)r);
         //MEMORY ADDRESS
-        stream.write((byte)a);
-        return stream.toByteArray();
+        instruction_stream.write((byte)variableCounter-1);
+
+        result[instructionCounter++] = instruction_stream.toByteArray();
+
+        return instruction_stream.toByteArray();
     }
 
     private void writeByteToStream(ByteArrayOutputStream stream, byte b){
@@ -121,13 +163,29 @@ public class Generator {
         writeByteToStream(stream, (byte)num5);
     }
 
+    private int checkConst(String s) {
+        if (s.matches("-?\\d+")) {
+            int val = Integer.parseInt(s);
+            lit_map.put(val, variableCounter);
+            variableCounter+=1;
+            //store the constant in the memory
+        }
+
+        else{
+            lit_map.put(0, variableCounter);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+            variableCounter+=1;
+        }
+
+        return variableCounter-1;
+    }
+        
+
     public byte[][] atomsToMachineCode() {
         //Create label table first
         createLabelTable(atoms);
         //Create address table
-        createAddressTable(atoms);
-
-        result = new byte[(atoms.size()-labelCounter)][8];
+        // createAddressTable(atoms);
+        //append the literals at the end of the file
 
         for(int i = 0; i < atoms.size(); i++) {
             //Read each atom
@@ -156,14 +214,11 @@ public class Generator {
                     int memR = -1;
 
                     //if a or b are constants, they are not yet stored in memory so we need to store them
-                    if (split [1].matches("-?\\d+")) {
-                        int val = Integer.parseInt(split[1]);
-                        //store the constant in the memory
-                    }
+                    checkConst(split[1]);
                     //obtain memory address of a
                     if (address_map.containsKey(split[1])) {
                         int mem = address_map.get(split[1]);
-                        for (byte b : getLoadInstruction(reg1, mem)) {
+                        for (byte b : writeLoadInstruction(reg1, mem)) {
                             stream.write(b);
                         }
                     }
@@ -171,16 +226,15 @@ public class Generator {
                         System.out.println("left operand could not be resolved");
                         System.exit(-1);
                     }
+                    
+                    checkConst(split[2]);
 
-                    if (split [2].matches("-?\\d+")) {
-                        //store the constant in the memory
-                    }
                     //obtain memory address of b
                     if (address_map.containsKey(split[2])) {
                         memR = address_map.get(split[2]);
-                        // for (byte b : getLoadInstruction(reg2, mem)) {
-                        //     stream.write(b);
-                        // }
+                    }
+                    else if (lit_map.containsKey(Integer.parseInt(split[2]))) {
+                        memR = lit_map.get(Integer.parseInt(split[2]));
                     }
                     else {
                         System.out.println("right operand could not be resolved");
@@ -194,27 +248,27 @@ public class Generator {
                     stream.write((byte)1);
                     //CMP (none for ADD)
                     stream.write((byte)0);
+
                     //REGISTER
                     stream.write((byte)reg1);
-
                     //MEM (right operand)
                     stream.write((byte)memR);
 
                     // writeByteToStream(stream, (byte)registerCounter);    
 
                     //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    if(split[3].startsWith("t")) {
-                        int mem = Integer.parseInt(split[3].substring(1)) + 10000;
+                    // if(split[3].startsWith("t")) {
+                    //     int mem = Integer.parseInt(split[3].substring(1)) + 10000;
                         
-                        writeAddress(stream, mem);
+                    //     writeAddress(stream, mem);
 
-                        pc+=4;
-                        registerCounter+=1;
-                    }
-                    else {
-                        System.out.println("Invalid instruction (ADD)");
-                        System.exit(-1);
-                    }
+                    //     pc+=4;
+                    //     registerCounter+=1;
+                    // }
+                    // else {
+                    //     System.out.println("Invalid instruction (ADD)");
+                    //     System.exit(-1);
+                    // }
                     break;
                 case "SUB":
                     //OP CODE
@@ -329,6 +383,10 @@ public class Generator {
                     //print the atom
                     System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3] + " " + split[4] + " " + split[5]);
 
+                    //if value is a constant, store it in memory
+                    checkConst(split[1]);
+                    checkConst(split[2]);
+
                     //resolve label
                     if (split[5].startsWith("L")) {
                         if (label_map.containsKey(split[5])) {
@@ -349,14 +407,16 @@ public class Generator {
                 case "MOV":
                     //(MOV, <val>, , <dest>) --> lod <val>, r1
                     //                           sto r1, <dest>
+                    
+                    String value = split[1];
+                    String name = split[3];
 
-                    //OP CODE for STO
-                    stream.write((byte)8);
-                    //CMP (none for STO)
-                    stream.write((byte)0);
-                    // //REGISTER
-                    stream.write((byte)0);
-                    //TODO fill in the rest for LOD
+                    //if value is a constant, store it in memory
+                    int addr = checkConst(value);
+                    
+                    writeLoadInstruction(++registerCounter, addr);
+                    writeStoreInstruction(registerCounter, name);
+
                     break;
                 default:
                     System.out.println("Invalid instruction (default)");
@@ -373,6 +433,9 @@ public class Generator {
             }
             labelFlag = false;
         }
+
+        //append data on to the end of result (literals)
+        
         return result;
     }
 
