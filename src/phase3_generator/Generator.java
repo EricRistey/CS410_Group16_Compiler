@@ -3,6 +3,7 @@ package phase3_generator;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
 
 public class Generator {
     /*
@@ -82,60 +83,67 @@ public class Generator {
             System.out.println();
         }
 
-        for (int i = 0; i < lit_map.size(); i++) {
-            System.out.println("LIT " + i + ": " + lit_map.get(i));
+        
+        //Print address table
+        System.out.println("Address Table: {Identifier} : {Address}");
+        System.out.println("----------------------------------------------");
+        for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
         }
+        System.out.println("----------------------------------------------");
+        System.out.println();
+
+        //Print literals table
+        System.out.println("Literals Table: {Address} : {Value}");
+        System.out.println("----------------------------------------------");
+        for(HashMap.Entry<Integer, Integer> entry : lit_map.entrySet()) {
+            // System.out.println(entry.getKey() + " : " + entry.getValue());
+            System.out.println(entry.getValue() + " : " + entry.getKey());
+        }
+        System.out.println("----------------------------------------------");
+        System.out.println();
 
     }
 
-    private byte[] writeLoadInstruction(int r, int a){
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        //OP CODE for LOD
-        stream.write((byte)7);
-        //CMP (none for LOD)
-        stream.write((byte)0);
-        // //REGISTER
-        stream.write((byte)r);
-        //MEMORY ADDRESS
-        stream.write((byte)a);
+    private void writeLoadInstruction(int r, int a){
+        // ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        // //OP CODE for LOD
+        // stream.write((byte)7);
+        // //CMP (none for LOD)
+        // stream.write((byte)0);
+        // // //REGISTER
+        // stream.write((byte)r);
+        // //MEMORY ADDRESS
+        // stream.write((byte)a);
 
-        result[instructionCounter++] = stream.toByteArray();
+        // result[instructionCounter++] = stream.toByteArray();
 
-        return stream.toByteArray();
+        // return stream.toByteArray();
+
+        writeInstruction(7, 0, r, a);
+
     }
-    // private byte[] getLoadInstructionLit(int r, int a){              //Should there be a serperate function for literals rather than memory addresses?
-                                                                        //for example, the 1 in the cmp slot tells the machine that the number in the "memory address" slot is 
-                                                                        //a literal and not a memory address
-    //     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    //     //OP CODE for LOD
-    //     stream.write((byte)7);
-    //     //CMP (none for LOD)
-    //     stream.write((byte)1);
-    //     // //REGISTER
-    //     stream.write((byte)r);
-    //     //MEMORY ADDRESS
-    //     stream.write((byte)a);
-    //     return stream.toByteArray();
-    // }
 
-    private byte[] writeStoreInstruction(int r, String name){
+    private void writeStoreInstruction(int r, String name){
         address_map.put(name, variableCounter);
         variableCounter+=1;
 
-        //NOT FINISHED
-        ByteArrayOutputStream instruction_stream = new ByteArrayOutputStream();
-        //OP CODE for STO
-        instruction_stream.write((byte)8);
-        //CMP (none for STO)
-        instruction_stream.write((byte)0);
-        // //REGISTER
-        instruction_stream.write((byte)r);
-        //MEMORY ADDRESS
-        instruction_stream.write((byte)variableCounter-1);
+        // //NOT FINISHED
+        // ByteArrayOutputStream instruction_stream = new ByteArrayOutputStream();
+        // //OP CODE for STO
+        // instruction_stream.write((byte)8);
+        // //CMP (none for STO)
+        // instruction_stream.write((byte)0);
+        // // //REGISTER
+        // instruction_stream.write((byte)r);
+        // //MEMORY ADDRESS
+        // instruction_stream.write((byte)variableCounter-1);
 
-        result[instructionCounter++] = instruction_stream.toByteArray();
+        // result[instructionCounter++] = instruction_stream.toByteArray();
 
-        return instruction_stream.toByteArray();
+        // return instruction_stream.toByteArray();
+
+        writeInstruction(8, 0, r, variableCounter-1);
     }
 
     private void writeByteToStream(ByteArrayOutputStream stream, byte b){
@@ -168,14 +176,70 @@ public class Generator {
         }
 
         else{
-            lit_map.put(0, variableCounter);    //if the value is not a constant (variable), reserve a memory address for it containing 0
-            variableCounter+=1;
+            if (address_map.containsKey(s)) {
+                int addr = address_map.get(s);
+                lit_map.put(0, addr);
+                return addr;
+            }
+            else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
+                lit_map.put(0, variableCounter);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+                variableCounter+=1;
+            }
         }
 
         return variableCounter-1;
     }
-        
+    
+    private void writeInstruction(int op, int cmp, int reg, int mem) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //OP CODE
+        //ensure the op code is 4bits
+        if (op > 15) {
+            System.out.println("Op code out of range");
+            System.exit(-1);
+        }
+        //ensure the cmp is a 0 + 3 bit number
+        if (cmp > 6) {
+            System.out.println("CMP out of range");
+            System.exit(-1);
+        }
+        //ensure the register is a 4 bit number
+        // if (reg > 15) {
+        //     System.out.print("Register out of range : (");
+        //     System.out.println(op + " " + cmp + " " + reg + " " + mem + ")");
+        //     System.exit(-1);
+        // }
+        //ensure the memory address is a 20 bit number
+        if (mem > 1048575) {
+            System.out.println("memory address out of range");
+            System.exit(-1);
+        }
 
+        stream.write((byte)op);
+        //CMP
+        stream.write((byte)cmp);
+        //REGISTER
+        stream.write((byte)reg);
+        //MEMORY ADDRESS
+
+        ByteArrayOutputStream addrStream = new ByteArrayOutputStream();
+        
+        addrStream.write((byte)mem);
+        byte[] addrArray = addrStream.toByteArray();
+
+        //pad 0s to the left of the memory address to make it 20 bits
+        for(int i = 0; i <= 3; i++) {
+            addrStream.write((byte)0);
+        }
+        addrStream.write((byte)mem);
+        addrArray = addrStream.toByteArray();
+        byte[] paddedArray = Arrays.copyOfRange(addrArray, addrArray.length-5, addrArray.length);
+        for(byte b : paddedArray) {
+            stream.write(b);
+        }
+        result[instructionCounter++] = stream.toByteArray();
+    }
+    
     public byte[][] atomsToMachineCode() {
         //Create label table first
         createLabelTable(atoms);
@@ -214,9 +278,7 @@ public class Generator {
                     //obtain memory address of a
                     if (address_map.containsKey(split[1])) {
                         int mem = address_map.get(split[1]);
-                        for (byte b : writeLoadInstruction(reg1, mem)) {
-                            stream.write(b);
-                        }
+                        writeLoadInstruction(reg1, mem);
                     }
                     else {
                         System.out.println("left operand could not be resolved");
@@ -237,18 +299,17 @@ public class Generator {
                         System.exit(-1);
                     }
                     
-                    //by this point, we have the memory addresses of a and b in registers r1 and r2
-                    //we can now add them
+                    // //OP CODE
+                    // stream.write((byte)1);
+                    // //CMP (none for ADD)
+                    // stream.write((byte)0);
 
-                    //OP CODE
-                    stream.write((byte)1);
-                    //CMP (none for ADD)
-                    stream.write((byte)0);
+                    // //REGISTER
+                    // stream.write((byte)reg1);
+                    // //MEM (right operand)
+                    // stream.write((byte)memR);
 
-                    //REGISTER
-                    stream.write((byte)reg1);
-                    //MEM (right operand)
-                    stream.write((byte)memR);
+                    writeInstruction(1,0, reg1, memR);
 
                     // writeByteToStream(stream, (byte)registerCounter);    
 
@@ -267,87 +328,116 @@ public class Generator {
                     // }
                     break;
                 case "SUB":
-                    //OP CODE
-                    stream.write((byte)2);
-                    //CMP (none for SUB)
-                    stream.write((byte)0);
-                    //REGISTER
-                    stream.write((byte)1);
+                    // //OP CODE
+                    // stream.write((byte)2);
+                    // //CMP (none for SUB)
+                    // stream.write((byte)0);
+                    // //REGISTER
+                    // stream.write((byte)1);
 
-                    //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    if(split[3].startsWith("t")) {
-                        int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        // stream.write((byte)mem);
+                    // //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    // if(split[3].startsWith("t")) {
+                    //     int mem = Integer.parseInt(split[3].substring(1)) + 10000;
+                    //     // stream.write((byte)mem);
 
-                        writeAddress(stream, mem);
+                    //     writeAddress(stream, mem);
 
-                        pc+=4;
-                        registerCounter+=1;
-                    }
-                    else {
-                        System.out.println("Invalid instruction (SUB)");
-                        System.exit(-1);
-                    }
+                    //     pc+=4;
+                    //     registerCounter+=1;
+                    // }
+                    // else {
+                    //     System.out.println("Invalid instruction (SUB)");
+                    //     System.exit(-1);
+                    // }
+
+                    int op = 2;
+                    int cmp = 0;
+                    int reg = 1;
+                    int mem = 11111;
+                    
+                    writeInstruction(op, cmp, reg, mem);
+
                     break;
                 case "MUL":
-                    //OP CODE
-                    stream.write((byte)3);
-                    //CMP (none for MUL)
-                    stream.write((byte)0);
-                    //REGISTER
-                    stream.write((byte)1);
+                    // //OP CODE
+                    // stream.write((byte)3);
+                    // //CMP (none for MUL)
+                    // stream.write((byte)0);
+                    // //REGISTER
+                    // stream.write((byte)1);
 
-                    //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    if(split[3].startsWith("t")) {
-                        int mem = Integer.parseInt(split[3].substring(1)) + 10000;
+                    // //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    // if(split[3].startsWith("t")) {
+                    //     int mem = Integer.parseInt(split[3].substring(1)) + 10000;
 
-                        writeAddress(stream, mem);
+                    //     writeAddress(stream, mem);
 
-                        pc+=4;
-                        registerCounter+=1;
-                    }
-                    else {
-                        System.out.println("Invalid instruction (MUL)");
-                        System.exit(-1);
-                    }
+                    //     pc+=4;
+                    //     registerCounter+=1;
+                    // }
+                    // else {
+                    //     System.out.println("Invalid instruction (MUL)");
+                    //     System.exit(-1);
+                    // }
+
+                    op = 3;
+                    cmp = 0;
+                    reg = 1;
+                    mem = 11111;
+
+                    writeInstruction(op, cmp, reg, mem);
+
                     break;
                 case "DIV":
-                    //OP CODE
-                    stream.write((byte)4);
-                    //CMP (none for DIV)
-                    stream.write((byte)0);
-                    //REGISTER
-                    stream.write((byte)1);
-                    //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
+                    // //OP CODE
+                    // stream.write((byte)4);
+                    // //CMP (none for DIV)
+                    // stream.write((byte)0);
+                    // //REGISTER
+                    // stream.write((byte)1);
+                    // //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
 
-                    if(split[3].startsWith("t")) {
-                        int mem = Integer.parseInt(split[3].substring(1)) + 10000;
+                    // if(split[3].startsWith("t")) {
+                    //     int mem = Integer.parseInt(split[3].substring(1)) + 10000;
 
-                        writeAddress(stream, mem);
+                    //     writeAddress(stream, mem);
                         
-                        pc+=4;
-                        registerCounter+=1;
-                    }
-                    else {
-                        System.out.println("Invalid instruction (DIV)");
-                        System.exit(-1);
-                    }
+                    //     pc+=4;
+                    //     registerCounter+=1;
+                    // }
+                    // else {
+                    //     System.out.println("Invalid instruction (DIV)");
+                    //     System.exit(-1);
+                    // }
+
+                    op = 4;
+                    cmp = 0;
+                    reg = 1;
+                    mem = 11111;
+
+                    writeInstruction(op, cmp, reg, mem);
+
                     break;
                 case "JMP":
-                    //if (!flag) break;
-                    //OP CODE
-                    stream.write((byte)5);
-                    //CMP (none for JMP)
-                    stream.write((byte)0);
-                    // //REGISTER (none for JMP)
-                    stream.write((byte)0);
+                    // //if (!flag) break;
+                    // //OP CODE
+                    // stream.write((byte)5);
+                    // //CMP (none for JMP)
+                    // stream.write((byte)0);
+                    // // //REGISTER (none for JMP)
+                    // stream.write((byte)0);
 
+                    op = 5;
+                    cmp = 0;
+                    reg = 0;
+                    
+                    mem = 0;
                     //MEMORY ADDRESS using Lable, our frontend uses all labels as L0, L1, L2, etc.
                     String label = split[5];
                     if(label.startsWith("L")) {
                         if (label_map.containsKey(label)) {     //check if the cooresponding label exists in the table
-                            int mem = label_map.get(label);     //get the memory address of the label
-                            stream.write((byte)mem);            //write the memory address to the stream
+                            mem = label_map.get(label);     //get the memory address of the label
+                            // stream.write((byte)mem);            //write the memory address to the stream
                             
                             pc = label_map.get(label); //pc becomes the memory address of the label from label table because that is the next execution
                             //(GREYSON)Not sure if we need to change pc here, The target device may changes its own pc to accomplish the jump
@@ -363,29 +453,48 @@ public class Generator {
                         System.out.println("Invalid instruction (JMP)");
                         System.exit(-1);
                     }
+
+                    writeInstruction(op, cmp, reg, mem);
+
                     break;
                 case "LBL":
                     break;
                 case "TST":
-                    // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
-                    //OP CODE for CMP
-                    stream.write((byte)6);
-                    //CMP (none for JMP)
-                    stream.write((byte)0);
-                    // //REGISTER (none for JMP)
-                    stream.write((byte)0);
+                    // // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
+                    // //OP CODE for CMP
+                    // stream.write((byte)6);
+                    // //CMP (none for JMP)
+                    // stream.write((byte)0);
+                    // // //REGISTER (none for JMP)
+                    // stream.write((byte)0);
                     
                     //print the atom
                     System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3] + " " + split[4] + " " + split[5]);
 
                     //if value is a constant, store it in memory
-                    checkConst(split[1]);
-                    checkConst(split[2]);
+                    int addr1 = checkConst(split[1]);
+                    int addr2 = checkConst(split[2]);
 
+                    //load the first value into a register
+                    writeLoadInstruction(++registerCounter, addr1);
+
+                    op = 6;
+                    cmp = Integer.parseInt(split[4]);
+                    reg = registerCounter;
+                    mem = addr2;
+
+                    writeInstruction(op, cmp, reg, mem);
+
+                    //jump to the label if the condition is true
+                    //OP CODE
+                    op = 5;
+                    cmp = 0;
+                    reg = 0;
+                    mem = -1;
                     //resolve label
                     if (split[5].startsWith("L")) {
                         if (label_map.containsKey(split[5])) {
-                            int mem = label_map.get(split[5]);
+                            mem = label_map.get(split[5]);
                             stream.write((byte)mem);
                         }
                         else {
@@ -397,6 +506,8 @@ public class Generator {
                         System.out.println("Invalid Label name (TST)");
                         System.exit(-1);
                     }
+
+                    writeInstruction(op, cmp, reg, mem);
 
                     break;
                 case "MOV":
@@ -421,8 +532,8 @@ public class Generator {
         }
 
         //append data on to the end of result (literals)
-        
         return result;
+
     }
 
     private void createAddressTable(List<String> atoms){
@@ -449,15 +560,6 @@ public class Generator {
                 variableCounter+=1;
             }
         }
-
-        //Print address table
-        System.out.println("Address Table: ");
-        System.out.println("----------------------------------------------");
-        for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
-        System.out.println("----------------------------------------------");
-        System.out.println();
 
     }
 

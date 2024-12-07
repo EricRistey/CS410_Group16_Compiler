@@ -1,4 +1,4 @@
-int f = 10;
+int f = 4;
 int r = 1;
 
 for (int i = f; i > 0; i= i-1) {
@@ -8,7 +8,7 @@ for (int i = f; i > 0; i= i-1) {
     }
 
     if (r > 100) {
-        r = r - 100;
+        r = r - 250;
     }
 
     else {
