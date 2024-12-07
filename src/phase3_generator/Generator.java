@@ -223,18 +223,28 @@ public class Generator {
         //MEMORY ADDRESS
 
         ByteArrayOutputStream addrStream = new ByteArrayOutputStream();
-        
-        addrStream.write((byte)mem);
-        byte[] addrArray = addrStream.toByteArray();
+
+        //count how many digits mem is
+        int count = 0;
+        int number = (byte)mem;
+        if(number == 0){
+            count = 1;
+        }
+        else{
+            while (number != 0) {
+                number /= 10;
+                count++;
+            }
+        }
 
         //pad 0s to the left of the memory address to make it 20 bits
-        for(int i = 0; i <= 3; i++) {
+        
+        for(int i = 0; i < 5-count; i++) {
             addrStream.write((byte)0);
         }
         addrStream.write((byte)mem);
-        addrArray = addrStream.toByteArray();
-        byte[] paddedArray = Arrays.copyOfRange(addrArray, addrArray.length-5, addrArray.length);
-        for(byte b : paddedArray) {
+        byte[] addrArray = addrStream.toByteArray();
+        for(byte b : addrArray) {
             stream.write(b);
         }
         result[instructionCounter++] = stream.toByteArray();
@@ -479,7 +489,7 @@ public class Generator {
                     if (split[5].startsWith("L")) {
                         if (label_map.containsKey(split[5])) {
                             mem = label_map.get(split[5]);
-                            stream.write((byte)mem);
+                            writeAddress(stream, mem);
                         }
                         else {
                             System.out.println("Label not found in label table (TST)");
