@@ -10,7 +10,7 @@ public class ScannerParser {
     public static void main(String[] args) {
         Scan scanner = new Scan();
         Scanner file = new Scanner(System.in);
-        String fileName = file.nextLine();
+        //String fileName = file.nextLine();
         TokenContainer tokens = scanner.scan("src/pipeline/test.c");
         file.close();
         //Create new Parse object

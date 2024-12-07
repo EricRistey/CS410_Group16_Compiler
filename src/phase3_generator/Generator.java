@@ -39,8 +39,6 @@ public class Generator {
     private List<String> atoms;
     private int pc;    
     private byte[][] result;
-    private boolean labelFlag;
-    private int labelCounter;
     private int instructionCounter;
     private int variableCounter;
     private int registerCounter;
@@ -52,12 +50,10 @@ public class Generator {
     public Generator(List<String> atoms) {
         this.atoms = atoms;
         pc = 100;
-        registerCounter = 1;
+        registerCounter = 0;
         label_map = new HashMap<String, Integer>();
         address_map = new HashMap<String, Integer>();
         lit_map = new HashMap<Integer, Integer>();
-        labelFlag = false;
-        labelCounter = 0;
         instructionCounter = 0;
 
         result = new byte[100][8];
@@ -87,7 +83,7 @@ public class Generator {
         }
 
         for (int i = 0; i < lit_map.size(); i++) {
-            System.out.println("LIT: " + i + " " + lit_map.get(i));
+            System.out.println("LIT " + i + ": " + lit_map.get(i));
         }
 
     }
@@ -369,7 +365,6 @@ public class Generator {
                     }
                     break;
                 case "LBL":
-                    labelFlag = true;
                     break;
                 case "TST":
                     // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
@@ -423,15 +418,6 @@ public class Generator {
                     System.exit(-1);
                     break;
             }
-
-            //Do not want to add empty instructions (LBL case)
-            if(labelFlag != true){
-                //Convert each atom to binary
-                result[instructionCounter] = stream.toByteArray();
-                instructionCounter+=1;
-                //result[i] = (byte)Integer.parseInt(atoms[i], 2);
-            }
-            labelFlag = false;
         }
 
         //append data on to the end of result (literals)
@@ -490,7 +476,6 @@ public class Generator {
                 if(label_map.containsKey(name)) {
                     break; // Label is already in table
                 }
-                labelCounter+=1;
                 label_map.put(name, pc);
                 continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
