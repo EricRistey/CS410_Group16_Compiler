@@ -238,6 +238,7 @@ public class Generator {
             stream.write(b);
         }
         result[instructionCounter++] = stream.toByteArray();
+        pc+=4;
     }
     
     public byte[][] atomsToMachineCode() {
@@ -270,14 +271,12 @@ public class Generator {
                     System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
 
                     int reg1 = ++registerCounter;   //register for a
-                    // int reg2 = ++registerCounter;   //register for b
-                    int memR = -1;
 
                     //if a or b are constants, they are not yet stored in memory so we need to store them
-                    checkConst(split[1]);
+                    int mem = checkConst(split[1]);
                     //obtain memory address of a
                     if (address_map.containsKey(split[1])) {
-                        int mem = address_map.get(split[1]);
+                        mem = address_map.get(split[1]);
                         writeLoadInstruction(reg1, mem);
                     }
                     else {
@@ -285,7 +284,7 @@ public class Generator {
                         System.exit(-1);
                     }
                     
-                    checkConst(split[2]);
+                    int memR = checkConst(split[2]);
 
                     //obtain memory address of b
                     if (address_map.containsKey(split[2])) {
@@ -311,21 +310,7 @@ public class Generator {
 
                     writeInstruction(1,0, reg1, memR);
 
-                    // writeByteToStream(stream, (byte)registerCounter);    
-
-                    //MEMORY ADDRESS (Our frontend uses all destinations as t0, t1, t2, etc.)
-                    // if(split[3].startsWith("t")) {
-                    //     int mem = Integer.parseInt(split[3].substring(1)) + 10000;
-                        
-                    //     writeAddress(stream, mem);
-
-                    //     pc+=4;
-                    //     registerCounter+=1;
-                    // }
-                    // else {
-                    //     System.out.println("Invalid instruction (ADD)");
-                    //     System.exit(-1);
-                    // }
+                    // writeByteToStream(stream, (byte)registerCounter);
                     break;
                 case "SUB":
                     // //OP CODE
@@ -488,9 +473,8 @@ public class Generator {
                     //jump to the label if the condition is true
                     //OP CODE
                     op = 5;
-                    cmp = 0;
-                    reg = 0;
-                    mem = -1;
+
+                    mem = 0;
                     //resolve label
                     if (split[5].startsWith("L")) {
                         if (label_map.containsKey(split[5])) {
@@ -507,7 +491,7 @@ public class Generator {
                         System.exit(-1);
                     }
 
-                    writeInstruction(op, cmp, reg, mem);
+                    writeInstruction(op, 0, 0, mem);
 
                     break;
                 case "MOV":
