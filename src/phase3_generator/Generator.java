@@ -30,12 +30,43 @@ public class Generator {
      *  STO memory[s2] <- fpreg[r1]: 8
      *  HLT: 9
      * 
-     *  (ADD, test, 10, t0) => 10010000
-     *  (SUB, 1, 0, t0) => 20010000
-     *  (MUL, t0, t1, t2) => 30010002
-     *  (DIV, t0, t1, t2) => 40010002
+     *  (ADD, test, 10, t0) =>
+     *      lw $t0, test(ex. 101)------700000101
+     *      li $t1, 10(ex. 102)  ------700100102
+     *      add $t3, $t0, $t1    ------10010000
+     *      sw $t3, t0(ex. 103)  ------800300103
+     * 
+     *  (SUB, 1, 0, t0) =>
+     *      li $t0, 1(ex. 101)------700000101
+     *      li $t1, 0(ex. 102)------700100102
+     *      sub $t3, $t0, $t1 ------20010000
+     *      sw $t3, t0(ex. 103)------800300103
+     * 
+     *  (MUL, t0, t1, t2) => 
+     *      lw $t0, t0(ex. 101)------700000101
+     *      lw $t1, t1(ex. 102)------700100102
+     *      mul $t3, $t0, $t1  ------30010002
+     *      sw $t3, t2(ex. 103)------800300103
+     * 
+     *  (DIV, t0, t1, t2) => 
+     *      lw $t0, t0(ex. 101)------700000101
+     *      lw $t1, t1(ex. 102)------700100102
+     *      div $t3, $t0, $t1 ------40010002
+     *      sw $t3, t2(ex. 103)------800300103
+     * 
      *  (JMP, , , , , L1) => 
+     *      jmp L1(ex. 104)
+     * 
+     *  (LBL,,,,,L0) =>
+     *      L0(ex. 116)
+     * 
      *  (TST, 11, t0, , 4, L0) => 
+     *      blt $t0, 4, L0(ex. 100) ------6000
+     * 
+     *  (MOV, t1, , i)
+     *      lw $t1, i(ex. 10000)
+     *      sw $t1, i
+     * 
      */
     private List<String> atoms;
     private int pc;    
@@ -94,7 +125,7 @@ public class Generator {
         System.out.println();
 
         //Print literals table
-        System.out.println("Literals Table: {Address} : {Value}");
+        System.out.println("Literals Table: {Value} : {Address}");
         System.out.println("----------------------------------------------");
         for(HashMap.Entry<Integer, Integer> entry : lit_map.entrySet()) {
             // System.out.println(entry.getKey() + " : " + entry.getValue());
@@ -169,20 +200,25 @@ public class Generator {
 
     private int checkConst(String s) {
         if (s.matches("-?\\d+")) {
+            System.out.println("CONSTANT: " + s);
+            System.out.println("VARIABLE: " + variableCounter);
             int val = Integer.parseInt(s);
-            lit_map.put(val, variableCounter);
+            System.out.println("INT: " + val);
+            lit_map.put(variableCounter, val);
             variableCounter+=1;
             //store the constant in the memory
         }
 
         else{
             if (address_map.containsKey(s)) {
+                System.out.println("UNKNOWN: " + s);
                 int addr = address_map.get(s);
                 lit_map.put(0, addr);
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
-                lit_map.put(0, variableCounter);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+                System.out.println("WHAT: " + s);
+                lit_map.put(variableCounter, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
                 variableCounter+=1;
             }
         }
@@ -286,7 +322,11 @@ public class Generator {
                     int mem = checkConst(split[1]);
                     //obtain memory address of a
                     if (address_map.containsKey(split[1])) {
+                        System.out.println("REGISTER: " + reg1);
                         mem = address_map.get(split[1]);
+                        writeLoadInstruction(reg1, mem);
+                    }
+                    else if (lit_map.containsKey(mem)) {
                         writeLoadInstruction(reg1, mem);
                     }
                     else {
@@ -299,9 +339,10 @@ public class Generator {
                     //obtain memory address of b
                     if (address_map.containsKey(split[2])) {
                         memR = address_map.get(split[2]);
+                        writeLoadInstruction(reg1, memR);
                     }
-                    else if (lit_map.containsKey(Integer.parseInt(split[2]))) {
-                        memR = lit_map.get(Integer.parseInt(split[2]));
+                    else if (lit_map.containsKey(memR)) {
+                        writeLoadInstruction(reg1, memR);
                     }
                     else {
                         System.out.println("right operand could not be resolved");
@@ -348,7 +389,7 @@ public class Generator {
                     int op = 2;
                     int cmp = 0;
                     int reg = 1;
-                    int mem = 11111;
+                    mem = 11111;
                     
                     writeInstruction(op, cmp, reg, mem);
 
