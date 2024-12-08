@@ -661,26 +661,39 @@ public class Parse{
         }  //}
         
         //Need to create jmp within if block in order to skip elseif/else in the case if is true (basically mimics an if elseif else program)
-        lbl++;
-        int lblNumberJMP = lbl;
-        createJMP(lblNumberJMP);
+ 
 
-        //Add decaf
-        createLBL(lblNumber);
+
 
         //ELSE-IF CASE
         if(accept(36)){
+            //Add decaf
+            createLBL(lblNumber);
+            lbl++;
+            int lblNumberJMP = lbl;
+            createJMP(lblNumberJMP);
             if(ElseIf().equals("REJECT")){
                 return "REJECT";
             }
+            createLBL(lblNumberJMP);
         }
         //ELSE CASE
         else if(accept(35)){
+            //Add decaf
+            createLBL(lblNumber);
+            lbl++;
+            int lblNumberJMP = lbl;
+            createJMP(lblNumberJMP);
             if(Else().equals("REJECT")){
                 return "REJECT";
             }
+            createLBL(lblNumberJMP);
         }
-        createLBL(lblNumberJMP);
+        else{
+            //Add decaf
+            createLBL(lblNumber);
+        }
+        
 
         if(peak(17)){
             return "ACCEPT";

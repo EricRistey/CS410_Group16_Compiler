@@ -2,5 +2,5 @@ if((11) > (1-0)){
     result = 1;
 }
 else{
-    result = 3
+    result = 3;
 }
