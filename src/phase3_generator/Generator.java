@@ -73,6 +73,7 @@ public class Generator {
     private int instructionCounter;
     private int variableCounter;
     private int registerCounter;
+    private int litCount;
 
     private HashMap<String, Integer> label_map;
     private HashMap<String, Integer> address_map;
@@ -82,10 +83,12 @@ public class Generator {
         this.atoms = atoms;
         pc = 100;
         registerCounter = 0;
+        instructionCounter = 0;
+        variableCounter = 0;
+        litCount = 0;
         label_map = new HashMap<String, Integer>();
         address_map = new HashMap<String, Integer>();
         lit_map = new HashMap<Integer, Integer>();
-        instructionCounter = 0;
 
         //Create label table
         int size = createLabelTable(atoms);
@@ -199,8 +202,8 @@ public class Generator {
     private int checkConst(String s) {
         if (s.matches("-?\\d+")) {
             int val = Integer.parseInt(s);
-            lit_map.put(variableCounter, val);
-            variableCounter+=1;
+            lit_map.put(litCount++, val);
+            //variableCounter+=1;
             //store the constant in the memory
         }
 
@@ -211,12 +214,12 @@ public class Generator {
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
-                lit_map.put(variableCounter, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
-                variableCounter+=1;
+                lit_map.put(litCount++, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+                //variableCounter+=1;
             }
         }
 
-        return variableCounter-1;
+        return litCount-1;//variableCounter-1
     }
     
     private void writeInstruction(int op, int cmp, int reg, int mem) {
@@ -307,7 +310,7 @@ public class Generator {
         }
 
         //STORE
-        writeStoreInstruction(instructionCounter, split[3]);
+        writeStoreInstruction(registerCounter, split[3]);
 
     }
     
