@@ -411,7 +411,8 @@ public class Generator {
 
                     break;
                 case "LBL":
-                    result[instructionCounter++] = null;
+                    writeInstruction(0,0,0,0);
+                    //result[instructionCounter++] = null;
                     break;
                 case "TST":
                     // // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
