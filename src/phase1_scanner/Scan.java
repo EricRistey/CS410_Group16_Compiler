@@ -252,6 +252,9 @@ public class Scan {
         }
 
         //Generator
+        System.out.println("_________________________________________________________________");
+        System.out.println("Generating");
+        System.out.println("_________________________________________________________________");
         Generator gen = new Generator(parse.getAtoms());
         gen.atomsToMachineCode();
         gen.printInstructions();

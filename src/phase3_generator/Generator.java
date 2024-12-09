@@ -81,11 +81,11 @@ public class Generator {
 
     public Generator(List<String> atoms) {
         this.atoms = atoms;
-        pc = 100;
+        pc = 1;
         registerCounter = 0;
         instructionCounter = 0;
-        variableCounter = 0;
-        litCount = 0;
+        variableCounter = 2000;
+        litCount = 1000;
         label_map = new HashMap<String, Integer>();
         address_map = new HashMap<String, Integer>();
         lit_map = new HashMap<Integer, Integer>();
@@ -97,7 +97,7 @@ public class Generator {
     }
 
     public void printInstructions() {
-        int pcTemp = 100;
+        int pcTemp = 1;
         System.out.println("\nLoc | Instruction");
         System.out.println("------------------");
         for(int i = 0; i < result.length; i++){
@@ -105,7 +105,7 @@ public class Generator {
             System.out.print(pcTemp + " | ");
 
             if(result[i] == null){
-                pcTemp+=4;
+                pcTemp+=1;
                 System.out.println("");
                 continue;
             }
@@ -114,7 +114,7 @@ public class Generator {
                 System.out.print(result[i][j]);
             }
 
-            pcTemp+=4;
+            pcTemp+=1;
             System.out.println();
         }
 
@@ -202,6 +202,7 @@ public class Generator {
     private int checkConst(String s) {
         if (s.matches("-?\\d+")) {
             int val = Integer.parseInt(s);
+            //System.out.println("CONST\nLitCount: " + litCount + " VAL: " + val + " Atom: " + s);
             lit_map.put(litCount++, val);
             //variableCounter+=1;
             //store the constant in the memory
@@ -210,10 +211,12 @@ public class Generator {
         else{
             if (address_map.containsKey(s)) {
                 int addr = address_map.get(s);
-                lit_map.put(0, addr);
+                lit_map.put(addr, 0);
+                //System.out.println("inADDRMAP \nLitCount: " + 0 + " VAL: " + addr + " Atom: " + s);
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
+                //System.out.println("LitCount: " + litCount + " VAL: " + 0 + " Atom: " + s);
                 lit_map.put(litCount++, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
                 //variableCounter+=1;
             }
@@ -256,7 +259,7 @@ public class Generator {
         writeAddress(stream, mem);
 
         result[instructionCounter++] = stream.toByteArray();
-        pc+=4;
+        pc+=1;
     }
 
     private void arithmeticInstruction(int op, String[] split){
@@ -529,30 +532,30 @@ public class Generator {
                 }
                 
                 label_map.put(name, pc);
-                pc+=4;
+                pc+=1;
                 size+=1;
                 //continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
             }
             else if(atoms.get(i).contains("ADD") || atoms.get(i).contains("SUB") || atoms.get(i).contains("MUL") || atoms.get(i).contains("DIV")) {
-                pc+=16;
+                pc+=4;
                 size+=4;
             }
             else if(atoms.get(i).contains("MOV")) {
-                pc+=8;
+                pc+=2;
                 size+=2;
             }
             else if(atoms.get(i).contains("TST")) {
-                pc+=12;
+                pc+=3;
                 size+=3;
             }
             else if(atoms.get(i).contains("JMP")) {
-                pc+=4;
+                pc+=1;
                 size+=1;
             } 
         }
 
-        pc = 100;   //reset pc to 100
+        pc = 1;   //reset pc to 100
 
         //Print label table
         System.out.println("\nLabel Table: ");
