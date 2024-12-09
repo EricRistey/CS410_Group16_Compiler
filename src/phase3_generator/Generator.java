@@ -3,7 +3,6 @@ package phase3_generator;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Arrays;
 
 public class Generator {
     /*
@@ -88,7 +87,9 @@ public class Generator {
         lit_map = new HashMap<Integer, Integer>();
         instructionCounter = 0;
 
-        result = new byte[100][8];
+        //Create label table
+        int size = createLabelTable(atoms);
+        result = new byte[size][8];
 
     }
 
@@ -97,14 +98,14 @@ public class Generator {
         System.out.println("\nLoc | Instruction");
         System.out.println("------------------");
         for(int i = 0; i < result.length; i++){
-            if (result[i].length != 0) {
-                if (result[i][0] == (byte)0) {
-                    break;
-                }
-            }
 
             System.out.print(pcTemp + " | ");
 
+            if(result[i] == null){
+                pcTemp+=4;
+                System.out.println("");
+                continue;
+            }
             for(int j = 0; j < result[i].length; j++){
 
                 System.out.print(result[i][j]);
@@ -179,7 +180,6 @@ public class Generator {
 
     private void writeByteToStream(ByteArrayOutputStream stream, byte b){
         stream.write(b);
-        //this.pc+=4;
     }
 
     private void writeAddress(ByteArrayOutputStream stream, int mem) {
@@ -188,8 +188,6 @@ public class Generator {
         int num3 = (mem/100)%10;
         int num4 = (mem/10)%10;
         int num5 = mem%10;
-
-        System.out.println("NUMBERS: " + num1 + ", " + num2 + ", " + num3 + ", " + num4 + ", " + num5);
 
         writeByteToStream(stream, (byte)num1);
         writeByteToStream(stream, (byte)num2);
@@ -200,10 +198,7 @@ public class Generator {
 
     private int checkConst(String s) {
         if (s.matches("-?\\d+")) {
-            //System.out.println("CONSTANT: " + s);
-            //System.out.println("VARIABLE: " + variableCounter);
             int val = Integer.parseInt(s);
-            //System.out.println("INT: " + val);
             lit_map.put(variableCounter, val);
             variableCounter+=1;
             //store the constant in the memory
@@ -211,13 +206,11 @@ public class Generator {
 
         else{
             if (address_map.containsKey(s)) {
-                //System.out.println("UNKNOWN: " + s);
                 int addr = address_map.get(s);
                 lit_map.put(0, addr);
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
-                //System.out.println("WHAT: " + s);
                 lit_map.put(variableCounter, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
                 variableCounter+=1;
             }
@@ -257,38 +250,14 @@ public class Generator {
         //REGISTER
         stream.write((byte)reg);
         //MEMORY ADDRESS
+        writeAddress(stream, mem);
 
-        ByteArrayOutputStream addrStream = new ByteArrayOutputStream();
-
-        //count how many digits mem is
-        int count = 0;
-        int number = (byte)mem;
-        if(number == 0){
-            count = 1;
-        }
-        else{
-            while (number != 0) {
-                number /= 10;
-                count++;
-            }
-        }
-
-        //pad 0s to the left of the memory address to make it 20 bits
-        
-        for(int i = 0; i < 5-count; i++) {
-            addrStream.write((byte)0);
-        }
-        addrStream.write((byte)mem);
-        byte[] addrArray = addrStream.toByteArray();
-        for(byte b : addrArray) {
-            stream.write(b);
-        }
         result[instructionCounter++] = stream.toByteArray();
         pc+=4;
     }
 
     private void arithmeticInstruction(int op, String[] split){
-        System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
+        //System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
 
         int reg1 = ++registerCounter;   //register for a
 
@@ -296,7 +265,6 @@ public class Generator {
         int mem = checkConst(split[1]);
         //obtain memory address of a
         if (address_map.containsKey(split[1])) {
-            //System.out.println("REGISTER: " + reg1);
             mem = address_map.get(split[1]);
             writeLoadInstruction(reg1, mem);
         }
@@ -344,8 +312,6 @@ public class Generator {
     }
     
     public byte[][] atomsToMachineCode() {
-        //Create label table first
-        createLabelTable(atoms);
         //append the literals at the end of the file
 
         for(int i = 0; i < atoms.size(); i++) {
@@ -435,17 +401,17 @@ public class Generator {
                         System.out.println("Invalid instruction (JMP)");
                         System.exit(-1);
                     }
-
                     writeInstruction(op, cmp, reg, mem);
 
                     break;
                 case "LBL":
+                    result[instructionCounter++] = null;
                     break;
                 case "TST":
                     // // true : 0, == : 1, < : 2, > : 3, <= : 4, >= : 5, != : 6
                     
                     //print the atom
-                    System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3] + " " + split[4] + " " + split[5]);
+                    //System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3] + " " + split[4] + " " + split[5]);
 
                     //if value is a constant, store it in memory
                     int addr1 = checkConst(split[1]);
@@ -512,6 +478,7 @@ public class Generator {
 
     }
 
+    /*
     private void createAddressTable(List<String> atoms){
         // int curr_address = 0;    // not sure if this is the correct starting address
 
@@ -538,8 +505,11 @@ public class Generator {
         }
 
     }
+        */
 
-    private void createLabelTable(List<String> atoms) {
+    private int createLabelTable(List<String> atoms) {
+        //Gather size for storing machine code
+        int size = 0;
         for(int i = 0; i < atoms.size(); i++) {
             if(atoms.get(i).contains("LBL")) {
                 //Split (LBL, L0) on commas and leave parenthesis out
@@ -554,21 +524,42 @@ public class Generator {
                 if(label_map.containsKey(name)) {
                     break; // Label is already in table
                 }
+                
                 label_map.put(name, pc);
-                continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
+                pc+=4;
+                size+=1;
+                //continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
             }
-            pc+=4;
+            else if(atoms.get(i).contains("ADD") || atoms.get(i).contains("SUB") || atoms.get(i).contains("MUL") || atoms.get(i).contains("DIV")) {
+                pc+=16;
+                size+=4;
+            }
+            else if(atoms.get(i).contains("MOV")) {
+                pc+=8;
+                size+=2;
+            }
+            else if(atoms.get(i).contains("TST")) {
+                pc+=12;
+                size+=3;
+            }
+            else if(atoms.get(i).contains("JMP")) {
+                pc+=4;
+                size+=1;
+            } 
         }
+
         pc = 100;   //reset pc to 100
 
         //Print label table
         System.out.println("\nLabel Table: ");
         System.out.println("----------------------------------------------");
         for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+            System.out.print(entry.getKey() + ": ");
+            System.out.printf("%05d\n", entry.getValue());
         }
         System.out.println("----------------------------------------------");
         System.out.println();
+        return size;
     }
 }
