@@ -437,7 +437,7 @@ public class Generator {
                     if (split[5].startsWith("L")) {
                         if (label_map.containsKey(split[5])) {
                             mem = label_map.get(split[5]);
-                            writeAddress(stream, mem);
+                            //writeAddress(stream, mem);
                         }
                         else {
                             System.out.println("Label not found in label table (TST)");
