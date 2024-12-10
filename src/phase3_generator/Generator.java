@@ -1,8 +1,12 @@
 package phase3_generator;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Generator {
     /*
@@ -92,8 +96,60 @@ public class Generator {
 
         //Create label table
         int size = createLabelTable(atoms);
-        result = new byte[size][8];
+        result = new byte[size+1][8];
 
+    }
+
+    private void writeBinaryFile(byte[][] result, HashMap<Integer, Integer> data) {
+        try (FileOutputStream fos = new FileOutputStream("out.bin")){
+
+            //Code Section
+            for (byte[] result1 : result) {
+                //Take pair and write it to file
+                System.out.println("RESULTS: " + Arrays.toString(result1));
+                //op & cmp
+                byte[] res = new byte[4];
+                res[0] = (byte) ((result1[0] & 0x0F) << 4 | (result1[1] & 0x0F));
+                //register and 4 of memory
+                res[1] = (byte) ((result1[2] & 0x0F) << 4 | (result1[3] & 0x0F));
+                //5th and 6th
+                res[2] = (byte) ((result1[4] & 0x0F) << 4 | (result1[5] & 0x0F));
+                //7th and 8th
+                res[3] = (byte) ((result1[6] & 0x0F) << 4 | (result1[7] & 0x0F));
+                
+                fos.write(res);
+            }
+
+            //Data Section
+            for(Map.Entry<Integer, Integer> entry: data.entrySet()){
+                //20 bit memory address
+                int mem = entry.getKey();
+                
+                //Ex. 02035
+                int num1 = mem/10000;//0
+                int num2 = (mem/1000)%10;//2
+                int num3 = (mem/100)%10;//0
+                int num4 = (mem/10)%10;//3
+                int num5 = mem%10;//5
+
+                //02
+                fos.write((byte) ((num1 & 0x0F) << 4 | (num2 & 0x0F)));
+                //03
+                fos.write((byte) ((num3 & 0x0F) << 4 | (num4 & 0x0F)));
+                //5
+                fos.write((byte) ((num5 & 0x0F)) << 4);//Last 4 bits is odd. I just left it to have 0's at the end. not sure how to pack 20 bits into bytes
+
+                //32 bit integer
+                fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
+                fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
+                fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
+                fos.write(entry.getValue().byteValue() & 0xFF);
+            }
+
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void printInstructions() {
@@ -480,6 +536,10 @@ public class Generator {
             }
         }
 
+        //Halt
+        writeInstruction(9, 0, 0, 0);
+
+        writeBinaryFile(result, lit_map);
         //append data on to the end of result (literals)
         return result;
 
