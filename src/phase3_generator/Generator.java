@@ -160,25 +160,19 @@ public class Generator {
     }
 
     private void writeStoreInstruction(int r, String name){
-        address_map.put(name, variableCounter);
-        variableCounter+=1;
 
-        // //NOT FINISHED
-        // ByteArrayOutputStream instruction_stream = new ByteArrayOutputStream();
-        // //OP CODE for STO
-        // instruction_stream.write((byte)8);
-        // //CMP (none for STO)
-        // instruction_stream.write((byte)0);
-        // // //REGISTER
-        // instruction_stream.write((byte)r);
-        // //MEMORY ADDRESS
-        // instruction_stream.write((byte)variableCounter-1);
+        //Check to see if variable exists. If so, save STO register to existing variable. If not, create new variable and STO.
+        if (address_map.containsKey(name)) {
+            writeInstruction(8, 0, r, address_map.get(name));
+        }
+        else{ 
+            address_map.put(name, variableCounter);
+            variableCounter+=1;
+            writeInstruction(8, 0, r, variableCounter-1);
+        }
 
-        // result[instructionCounter++] = instruction_stream.toByteArray();
-
-        // return instruction_stream.toByteArray();
-
-        writeInstruction(8, 0, r, variableCounter-1);
+        //Reset register counter
+        registerCounter-=1;
     }
 
     private void writeByteToStream(ByteArrayOutputStream stream, byte b){
@@ -203,7 +197,11 @@ public class Generator {
         if (s.matches("-?\\d+")) {
             int val = Integer.parseInt(s);
             //System.out.println("CONST\nLitCount: " + litCount + " VAL: " + val + " Atom: " + s);
-            lit_map.put(litCount++, val);
+
+            //Check to see if literal already contains address
+            if(!lit_map.containsValue(val)){
+                lit_map.put(litCount++, val);
+            }
             //variableCounter+=1;
             //store the constant in the memory
         }
@@ -211,13 +209,13 @@ public class Generator {
         else{
             if (address_map.containsKey(s)) {
                 int addr = address_map.get(s);
-                lit_map.put(addr, 0);
+                lit_map.put(addr, -1);
                 //System.out.println("inADDRMAP \nLitCount: " + 0 + " VAL: " + addr + " Atom: " + s);
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
                 //System.out.println("LitCount: " + litCount + " VAL: " + 0 + " Atom: " + s);
-                lit_map.put(litCount++, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+                lit_map.put(litCount++, -1);    //if the value is not a constant (variable), reserve a memory address for it containing 0
                 //variableCounter+=1;
             }
         }
@@ -284,13 +282,12 @@ public class Generator {
         
         int memR = checkConst(split[2]);
 
-        //obtain memory address of b
+        //obtain memory address of b. do not have to write load instruction since we're using the memory address directly.
         if (address_map.containsKey(split[2])) {
             memR = address_map.get(split[2]);
-            writeLoadInstruction(reg1, memR);
         }
         else if (lit_map.containsKey(memR)) {
-            writeLoadInstruction(reg1, memR);
+            //Do nothing
         }
         else {
             System.out.println("right operand could not be resolved");
@@ -458,6 +455,9 @@ public class Generator {
 
                     writeInstruction(op, 0, 0, mem);
 
+                    //Reset register counter
+                    registerCounter-=1;
+
                     break;
                 case "MOV":
                     //(MOV, <val>, , <dest>) --> lod <val>, r1
@@ -539,8 +539,8 @@ public class Generator {
                 //no need to increment pc since there is no instruction
             }
             else if(atoms.get(i).contains("ADD") || atoms.get(i).contains("SUB") || atoms.get(i).contains("MUL") || atoms.get(i).contains("DIV")) {
-                pc+=4;
-                size+=4;
+                pc+=3;
+                size+=3;
             }
             else if(atoms.get(i).contains("MOV")) {
                 pc+=2;
