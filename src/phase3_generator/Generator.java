@@ -150,6 +150,9 @@ public class Generator {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < result.length; i++) {
+
+            boolean line_is_jump = false;
+
             if(result[i] == null){
                 continue;
             }
@@ -189,6 +192,7 @@ public class Generator {
                 
                 case 5:
                     sb.append("JMP ");
+                    line_is_jump = true;
                     break;
                 
                 case 6:
@@ -237,20 +241,32 @@ public class Generator {
 
             sb.append("$" + reg + ", ");
 
-            //match the addresses to idetifiers/literals if possible
-            boolean found = false;
+            //match the addresses to labels/idetifiers/literals if possible
+            boolean found = false;      //there likely a way to do this without a flag.
+
+            if (line_is_jump) {
+                for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
+                    if(entry.getValue() == mem_int) {
+                        sb.append(entry.getKey() + "\n");
+                        found = true;
+                        break;
+                    }
+                }
+            }
 
             //search the address table
-            for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
-                if(entry.getValue() == mem_int) {
-                    sb.append(entry.getKey() + "\n");
-                    found = true;
-                    break;
+            if (!found) {
+                for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
+                    if(entry.getValue() == mem_int) {
+                        sb.append(entry.getKey() + "\n");
+                        found = true;
+                        break;
+                    }
                 }
             }
 
             //if not found in address table, search the literals table
-            if(!found) {
+            if (!found) {
                 for(HashMap.Entry<Integer, Integer> entry : lit_map.entrySet()) {
                     if(entry.getKey() == mem_int) {
                         sb.append(entry.getValue() + "\n");
@@ -261,10 +277,13 @@ public class Generator {
             }
             
             //if not found in literals table, print the memory address
-            if(!found){
+            if (!found && mem_int != 0) {   //if the memory address is 0 it likely doesnt need to be printed
                 sb.append("#" + mem_int + "\n"); 
             }
 
+            if (mem_int == 0) {
+                sb.append("\n");
+            }
         }
 
         System.out.println(sb.toString());
