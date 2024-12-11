@@ -1,6 +1,7 @@
 package phase3_generator;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 
@@ -94,6 +95,140 @@ public class Generator {
         int size = createLabelTable(atoms);
         result = new byte[size][8];
 
+    }
+
+    private int readAddress(byte[] bytes) {
+        int num1 = bytes[0] * 10000;
+        int num2 = bytes[1] * 1000;
+        int num3 = bytes[2] * 100;
+        int num4 = bytes[3] * 10;
+        int num5 = bytes[4];
+    
+        return num1 + num2 + num3 + num4 + num5;
+    }
+
+    public void printMnemonics(){
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < result.length; i++) {
+            if(result[i] == null){
+                continue;
+            }
+
+            sb.append(i + " | ");
+
+            byte[] bytes = result[i];
+
+            byte op = bytes[0];
+            byte cmp = bytes[1];
+            byte reg = bytes[2];
+            byte[] mem = new byte[5];
+
+            for (int j = 0; j < 5; j++) {
+                mem[j] = bytes[j + 3];
+            }
+            
+            int mem_int = readAddress(mem);
+
+            switch (op) {
+                case 0:
+                    sb.append("CLR ");
+                    break;
+
+                case 1:
+                    sb.append("ADD ");
+                    break;
+                case 2:
+                    sb.append("SUB ");
+                    break;
+                case 3:
+                    sb.append("MUL ");
+                    break;
+                case 4:
+                    sb.append("DIV ");
+                    break;
+                
+                case 5:
+                    sb.append("JMP ");
+                    break;
+                
+                case 6:
+                    sb.append("CMP ");
+                    break;
+                
+                case 7:
+                    sb.append("LOD ");
+                    break;
+
+                case 8:
+                    sb.append("STO ");
+                    break;
+
+                case 9:
+                    sb.append("HLT ");
+                    break;
+
+            }
+
+            switch (cmp) {
+                case 0:
+                    sb.append(" ");
+                    break;
+                case 1:
+                    sb.append("EQ ");
+                    break;
+                case 2:
+                    sb.append("LT ");
+                    break;
+                case 3:
+                    sb.append("GT ");
+                    break;
+                case 4:
+                    sb.append("LE ");
+                    break;
+                case 5:
+                    sb.append("GE ");
+                    break;
+                case 6:
+                    sb.append("NE ");
+                    break;
+                default:
+                    break;
+            }
+
+            sb.append("$" + reg + ", ");
+
+            //match the addresses to idetifiers/literals if possible
+            boolean found = false;
+
+            //search the address table
+            for(HashMap.Entry<String, Integer> entry : address_map.entrySet()) {
+                if(entry.getValue() == mem_int) {
+                    sb.append(entry.getKey() + "\n");
+                    found = true;
+                    break;
+                }
+            }
+
+            //if not found in address table, search the literals table
+            if(!found) {
+                for(HashMap.Entry<Integer, Integer> entry : lit_map.entrySet()) {
+                    if(entry.getKey() == mem_int) {
+                        sb.append(entry.getValue() + "\n");
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            //if not found in literals table, print the memory address
+            if(!found){
+                sb.append("#" + mem_int + "\n"); 
+            }
+
+        }
+
+        System.out.println(sb.toString());
     }
 
     public void printInstructions() {
