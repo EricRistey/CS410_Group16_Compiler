@@ -123,23 +123,6 @@ public class Generator {
 
             //Data Section
             for(Map.Entry<Integer, Integer> entry: data.entrySet()){
-                //20 bit memory address
-                int mem = entry.getKey();
-                
-                //Ex. 02035
-                int num1 = mem/10000;//0
-                int num2 = (mem/1000)%10;//2
-                int num3 = (mem/100)%10;//0
-                int num4 = (mem/10)%10;//3
-                int num5 = mem%10;//5
-
-                //02
-                fos.write((byte) ((num1 & 0x0F) << 4 | (num2 & 0x0F)));
-                //03
-                fos.write((byte) ((num3 & 0x0F) << 4 | (num4 & 0x0F)));
-                //5
-                fos.write((byte) ((num5 & 0x0F)) << 4);//Last 4 bits is odd. I just left it to have 0's at the end. not sure how to pack 20 bits into bytes
-
                 //32 bit integer
                 fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
                 fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
