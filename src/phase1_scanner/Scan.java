@@ -313,7 +313,7 @@ public class Scan {
                 java.io.File file1 = new java.io.File(fileName);
                 if(!file1.exists()){
                     System.out.println("File does not exist.");
-                    file.close();
+                    
                 }
                 else{
                     
