@@ -721,11 +721,31 @@ public class Generator {
                 }
             }
 
+            //remove aritmetic of identity elements
+            if (op == 1 || op == 2) {//ADD or SUB
+                //search for mem_int in literals table
+                if (lit_map.containsKey(mem_int)) {
+                    if (lit_map.get(mem_int) == 0) {
+                        //remove the current instruction
+                        result[i] = null;
+                    }
+                }
+            }
+
+            if (op == 3 || op == 4) {//MUL or DIV
+                //search for mem_int in literals table
+                if (lit_map.containsKey(mem_int)) {
+                    if (lit_map.get(mem_int) == 1) {
+                        //remove the current instruction
+                        result[i] = null;
+                    }
+                }
+            }
+
             prevReg = reg;
             prevMem = mem;
 
         }
-
 
         result = removeNulls(result);
         
