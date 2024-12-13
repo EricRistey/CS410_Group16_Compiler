@@ -1,0 +1,7 @@
+(SUB, 1, 0, t0)
+(TST, 11, t0, , 4, L0)
+(MOV, 1, , result)
+(LBL, , , , , L0)
+(JMP, , , , , L1)
+(MOV, 3, , result)
+(LBL, , , , , L1)

@@ -256,7 +256,7 @@ public class Scan {
         System.out.println("Generating");
         System.out.println("_________________________________________________________________");
         Generator gen = new Generator(parse.getAtoms());
-        gen.atomsToMachineCode();
+        gen.atomsToMachineCode("test.mc");
         gen.printInstructions();
     };
 

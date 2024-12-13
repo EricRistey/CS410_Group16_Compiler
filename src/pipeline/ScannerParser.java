@@ -36,7 +36,7 @@ public class ScannerParser {
 
         //Generator
         Generator gen = new Generator(parse.getAtoms());
-        gen.atomsToMachineCode();
+        gen.atomsToMachineCode("test.mc");
         gen.printInstructions();
         gen.printMnemonics();
     }

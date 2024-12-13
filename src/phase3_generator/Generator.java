@@ -3,8 +3,6 @@ package phase3_generator;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,34 +78,38 @@ public class Generator {
     private int registerCounter;
     private int litCount;
 
+    private boolean optimize;
     private HashMap<String, Integer> label_map;
     private HashMap<String, Integer> address_map;
     private HashMap<Integer, Integer> lit_map;
 
-    public Generator(List<String> atoms) {
+    public Generator(List<String> atoms, boolean optimize) {
         this.atoms = atoms;
-        pc = 1;
-        registerCounter = 0;
-        instructionCounter = 0;
-        variableCounter = 2000;
-        litCount = 1000;
-        label_map = new HashMap<String, Integer>();
-        address_map = new HashMap<String, Integer>();
-        lit_map = new HashMap<Integer, Integer>();
+        this.pc = 1;
+        this.registerCounter = 0;
+        this.instructionCounter = 0;
+        this.variableCounter = 2000;
+        this.litCount = 1000;
+
+        this.optimize = optimize;
+
+        this.label_map = new HashMap<String, Integer>();
+        this.address_map = new HashMap<String, Integer>();
+        this.lit_map = new HashMap<Integer, Integer>();
 
         //Create label table
         int size = createLabelTable(atoms);
+        //+1 accounts for the HLT instruction
         result = new byte[size+1][8];
 
     }
 
-    private void writeBinaryFile(byte[][] result, HashMap<Integer, Integer> data) {
-        try (FileOutputStream fos = new FileOutputStream("out.bin")){
+    private void writeBinaryFile(byte[][] result, HashMap<Integer, Integer> data, String filename) {
+        try (FileOutputStream fos = new FileOutputStream(filename)){
 
             //Code Section
             for (byte[] result1 : result) {
                 //Take pair and write it to file
-                System.out.println("RESULTS: " + Arrays.toString(result1));
                 //op & cmp
                 byte[] res = new byte[4];
                 res[0] = (byte) ((result1[0] & 0x0F) << 4 | (result1[1] & 0x0F));
@@ -129,8 +131,6 @@ public class Generator {
                 fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
                 fos.write(entry.getValue().byteValue() & 0xFF);
             }
-
-            fos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -507,7 +507,7 @@ public class Generator {
 
     }
     
-    public byte[][] atomsToMachineCode() {
+    public byte[][] atomsToMachineCode(String filename) {
         //append the literals at the end of the file
 
         for(int i = 0; i < atoms.size(); i++) {
@@ -676,7 +676,8 @@ public class Generator {
         //Halt
         writeInstruction(9, 0, 0, 0);
 
-        writeBinaryFile(result, lit_map);
+        writeBinaryFile(result, lit_map, filename);
+
         //append data on to the end of result (literals)
         return result;
 
