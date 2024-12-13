@@ -157,7 +157,7 @@ public class Generator {
                 continue;
             }
 
-            sb.append(i + " | ");
+            sb.append((i+1) + " | ");
 
             byte[] bytes = result[i];
 
@@ -334,20 +334,6 @@ public class Generator {
     }
 
     private void writeLoadInstruction(int r, int a){
-        // ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        // //OP CODE for LOD
-        // stream.write((byte)7);
-        // //CMP (none for LOD)
-        // stream.write((byte)0);
-        // // //REGISTER
-        // stream.write((byte)r);
-        // //MEMORY ADDRESS
-        // stream.write((byte)a);
-
-        // result[instructionCounter++] = stream.toByteArray();
-
-        // return stream.toByteArray();
-
         writeInstruction(7, 0, r, a);
 
     }
@@ -676,6 +662,10 @@ public class Generator {
         //Halt
         writeInstruction(9, 0, 0, 0);
 
+        if (optimize) {
+            localOptimization();
+        }
+
         writeBinaryFile(result, lit_map, filename);
 
         //append data on to the end of result (literals)
@@ -683,35 +673,88 @@ public class Generator {
 
     }
 
-    /*
-    private void createAddressTable(List<String> atoms){
-        // int curr_address = 0;    // not sure if this is the correct starting address
+    private void localOptimization(){
+        //load store optimization
+        //remove redundant load and store instructions
 
-        for(int i = 0; i < atoms.size(); i++) {
-            String atom = atoms.get(i).replace("(", "").replace(")", "");
-            if(atoms.get(i).contains("MOV")) {
-                //Split (MOV, 10, , t0) on commas and leave parenthesis out
-                //Remove parenthesis
-                atom = atoms.get(i).replace("(", "").replace(")", "");
-                String[] split = atom.split(",");
-                for(int j = 0; j < split.length; j++) {
-                    split[j] = split[j].trim();
+        System.out.println("Optimizing...");
+
+        byte[] prevMem = new byte[5];
+        byte prevReg = 0;
+
+        for (int i = 0; i < result.length; i++) {
+
+            boolean line_is_jump = false;
+
+            if(result[i] == null){
+                continue;
+            }
+
+            byte[] bytes = result[i];
+
+            byte op = bytes[0];
+            byte cmp = bytes[1];
+            byte reg = bytes[2];
+            byte[] mem = new byte[5];
+
+            for (int j = 0; j < 5; j++) {
+                mem[j] = bytes[j + 3];
+            }
+            
+            int mem_int = readAddress(mem);
+
+            if (op == 7) {  //load instruction
+                if (prevReg == reg && prevMem[0] == mem[0] && prevMem[1] == mem[1] && prevMem[2] == mem[2] && prevMem[3] == mem[3] && prevMem[4] == mem[4]) {
+                    //remove the previous store instruction
+                    result[i-1] = null;
+                    //remove the current load instruction
+                    result[i] = null;
                 }
-                //When a MOV atom is encountered enter it in the address table.
-                String name = split[3];
-                if(address_map.containsKey(name)) {
-                    break; // Address is already in table
+            }
+
+            if (op == 8) {  //store instruction
+                if (prevReg == reg && prevMem[0] == mem[0] && prevMem[1] == mem[1] && prevMem[2] == mem[2] && prevMem[3] == mem[3] && prevMem[4] == mem[4]) {
+                    //remove the previous load instruction
+                    result[i-1] = null;
+                    //remove the current store instruction
+                    result[i] = null;
                 }
-                // address_map.put(name, curr_address);
-                // curr_address+=1;
-                address_map.put(name, variableCounter);
-                variableCounter+=1;
+            }
+
+            prevReg = reg;
+            prevMem = mem;
+
+        }
+
+
+        result = removeNulls(result);
+        
+    }
+        
+    private byte[][] removeNulls(byte[][] result2) {
+        
+        //count non nulls
+        int count = 0;
+        for (int i = 0; i < result2.length; i++) {
+            if (result2[i] != null) {
+                count++;
             }
         }
 
-    }
-        */
+        //create new array with only non nulls
+        byte[][] result3 = new byte[count][8];
+        count = 0;
+        for (int i = 0; i < result2.length; i++) {
+            if (result2[i] != null) {
+                result3[count] = result2[i];
+                count++;
+            }
+        }
 
+        return result3;
+
+    }
+        
     private int createLabelTable(List<String> atoms) {
         //Gather size for storing machine code
         int size = 0;

@@ -13,11 +13,21 @@ public class RunBack {
         boolean optimize = false;
         List<String> atoms = new ArrayList<>();
 
-        String atomsFile = args[0];
-        String mcFileName = args[1];
-        
-        if(args.length > 2) {
-            String opFlag = args[2];
+        //For debugging
+        String atomsFile = "";
+        String mcFileName = "";
+        if (args.length < 2) {
+            // System.out.println("Usage: java RunBack <atomsFile> <mcFileName> [-o/+o]");
+            // System.exit(1);
+
+            //scanner
+            Scanner scanner = new Scanner(System.in);
+            System.out.println(".atom file: ");
+            atomsFile = scanner.nextLine();
+            System.out.println("MC file: ");
+            mcFileName = scanner.nextLine();
+            System.out.println("Optimize? (-o/+o): ");
+            String opFlag = scanner.nextLine();
             System.out.println("OPFLAG: " + opFlag);
             if(opFlag.equals("-o")) {
                 optimize = false;
@@ -25,8 +35,24 @@ public class RunBack {
             else if(opFlag.equals("+o")) {
                 optimize = true;
             }
-        }
 
+
+        }
+        else{
+            atomsFile = args[0];
+            mcFileName = args[1];
+            
+            if(args.length > 2) {
+                String opFlag = args[2];
+                System.out.println("OPFLAG: " + opFlag);
+                if(opFlag.equals("-o")) {
+                    optimize = false;
+                }
+                else if(opFlag.equals("+o")) {
+                    optimize = true;
+                }
+            }
+        }
 
         //Obtain List of atoms
         atoms = readFile(atomsFile);
@@ -35,6 +61,7 @@ public class RunBack {
         Generator gen = new Generator(atoms, optimize);
         gen.atomsToMachineCode(mcFileName);
         gen.printInstructions();
+        gen.printMnemonics();
     }
 
     private static List<String> readFile(String file){
