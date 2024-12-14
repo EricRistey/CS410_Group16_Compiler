@@ -1,5 +1,6 @@
+(MOV, 3, , num)
 (SUB, 1, 0, t0)
-(TST, 11, t0, , 4, L0)
+(TST, num, t0, , 4, L0)
 (MOV, 1, , result)
 (LBL, , , , , L0)
 (JMP, , , , , L1)
