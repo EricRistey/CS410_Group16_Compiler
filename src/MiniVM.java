@@ -59,6 +59,7 @@ public class MiniVM {
 
 	public void execute(boolean verbose, boolean stepwise) {
 		try {
+			System.out.println("mmmmmm "+mem[START_ADDRESS]);
 			reg[PC_REGISTER] = mem[START_ADDRESS];
 
 			if (verbose) {
@@ -77,6 +78,8 @@ public class MiniVM {
 					System.in.read();
 					System.out.println();
 				}
+
+				System.out.println("Instruction: " + reg[1]);
 
 				ir = new Instr(mem[reg[PC_REGISTER]]);
 				executeInstr();
@@ -111,30 +114,37 @@ public class MiniVM {
 	private void executeInstr() {
 		switch (ir.instructionType()) {
 			case CLR -> {
+				System.out.println("Clearing register " + ir.r1());
 				fpreg[ir.r1()] = 0;
 			}
 			case ADD -> {
+				System.out.println("Adding " + ir.r1());
 				final int dest = absMemoryLocation(ir);
 				fpreg[ir.r1()] = fpreg[ir.r1()] + Float.intBitsToFloat(mem[dest]);
 			}
 			case SUB -> {
+				System.out.println("Subtracting " + ir.r1());
 				final int dest = absMemoryLocation(ir);
 				fpreg[ir.r1()] = fpreg[ir.r1()] - Float.intBitsToFloat(mem[dest]);
 			}
 			case MUL -> {
+				System.out.println("Multiplying " + ir.r1());
 				final int dest = absMemoryLocation(ir);
 				fpreg[ir.r1()] = fpreg[ir.r1()] * Float.intBitsToFloat(mem[dest]);
 			}
 			case DIV -> {
+				System.out.println("Dividing " + ir.r1());
 				final int dest = absMemoryLocation(ir);
 				fpreg[ir.r1()] = fpreg[ir.r1()] / Float.intBitsToFloat(mem[dest]);
 			}
 			case JMP -> {
+				System.out.println("Jumping to " + ir.address());
 				if (flag) {
 					reg[PC_REGISTER] = absMemoryLocation(ir);
 				}
 			}
 			case CMP -> {
+				System.out.println("Comparing " + ir.r1());
 				final float rhs = Float.intBitsToFloat(mem[absMemoryLocation(ir)]);
 				flag = switch (ir.comparisonType()) {
 					case ALWAYS -> true;
@@ -147,12 +157,15 @@ public class MiniVM {
 				};
 			}
 			case LOD -> {
+				System.out.println("Loading " + ir.r1());
 				fpreg[ir.r1()] = Float.intBitsToFloat(mem[absMemoryLocation(ir)]);
 			}
 			case STO -> {
+				System.out.println("Storing " + ir.r1());
 				mem[absMemoryLocation(ir)] = Float.floatToIntBits(fpreg[ir.r1()]);
 			}
 			case HLT -> {
+				System.out.println("Halting...");
 				halt = true;
 			}
 		}
