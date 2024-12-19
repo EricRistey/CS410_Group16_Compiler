@@ -1,8 +1,8 @@
-(MOV, 3, , num)
-(SUB, 1, 0, t0)
-(TST, num, t0, , 4, L0)
-(MOV, 1, , result)
+(MOV, t0, , 13.5)
+(SUB, 1, 0, t1)
+(TST, num, t1, , 4, L0)
+TST, num, t1, , 4, L0
 (LBL, , , , , L0)
 (JMP, , , , , L1)
-(MOV, 3, , result)
+JMP, , , , , L1
 (LBL, , , , , L1)
