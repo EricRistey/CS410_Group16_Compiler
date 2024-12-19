@@ -34,6 +34,7 @@ public class Parse{
     private int tempDest;
     private String dest;
     private int flag;// 1 => Assignment, 0 => Bool
+    private boolean optimize;
 
     //Using VS CODE:
     //Compile the files:  javac -d bin src/phase2_parser/Parse.java 
@@ -320,7 +321,7 @@ public class Parse{
     }
 
 
-    public Parse(int[] terminals, String[] tokens, int length) {
+    public Parse(int[] terminals, String[] tokens, int length, boolean optimize) {
         this.terminals = terminals;
         this.index = 0;
         this.length = length;
@@ -331,6 +332,7 @@ public class Parse{
         this.mathOps = new ArrayList<>();
         this.tokens = tokens;
         this.flag = 0;
+        this.optimize = optimize;
     }
     public Parse() {
         this.terminals = new int[0];

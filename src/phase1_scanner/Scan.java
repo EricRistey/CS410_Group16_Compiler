@@ -230,7 +230,7 @@ public class Scan {
         System.out.println("PARSING");
         System.out.println("_________________________________________________________________");
         //Create new Parse object
-        Parse parse = new Parse(states, states_string, j);
+        Parse parse = new Parse(states, states_string, j, false);
 
         //Run the parser and print result of statement (ACCEPT or REJECT)
         String parseResult = parse.Statement();
@@ -255,7 +255,7 @@ public class Scan {
         System.out.println("_________________________________________________________________");
         System.out.println("Generating");
         System.out.println("_________________________________________________________________");
-        Generator gen = new Generator(parse.getAtoms());
+        Generator gen = new Generator(parse.getAtoms(), false);
         gen.atomsToMachineCode("test.mc");
         gen.printInstructions();
     };

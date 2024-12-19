@@ -10,11 +10,12 @@ public class ScannerParser {
     public static void main(String[] args) {
         Scan scanner = new Scan();
         Scanner file = new Scanner(System.in);
+        boolean optimize = false;
         //String fileName = file.nextLine();
         TokenContainer tokens = scanner.scan("src/pipeline/test.c");
         file.close();
         //Create new Parse object
-        Parse parse = new Parse(tokens.states, tokens.states_string, tokens.length);
+        Parse parse = new Parse(tokens.states, tokens.states_string, tokens.length, optimize);
 
         //Run the parser and print result of statement (ACCEPT or REJECT)
         String parseResult = parse.Statement();

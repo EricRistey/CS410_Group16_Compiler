@@ -107,6 +107,13 @@ public class Generator {
     private void writeBinaryFile(byte[][] result, HashMap<Integer, Integer> data, String filename) {
         try (FileOutputStream fos = new FileOutputStream(filename)){
 
+            //Index Header, must be integer 1
+            fos.write(0x00);//1 byte
+            fos.write(0x00);//1 byte
+            fos.write(0x00);//1 byte
+            fos.write(0x01);//1 byte
+
+
             //Code Section
             for (byte[] result1 : result) {
                 //Take pair and write it to file
@@ -587,7 +594,7 @@ public class Generator {
 
                     break;
                 case "LBL":
-                    writeInstruction(0,0,0,0);
+                    //writeInstruction(0,0,0,0);
                     //result[instructionCounter++] = null;
                     break;
                 case "TST":
@@ -794,8 +801,8 @@ public class Generator {
                 }
                 
                 label_map.put(name, pc);
-                pc+=1;
-                size+=1;
+                //pc+=1;
+                //size+=1;
                 //continue;   //continue so pc isn't incremented. LBL points to the next line, so the next line should have the same line number as current.
                 //no need to increment pc since there is no instruction
             }
