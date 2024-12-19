@@ -29,7 +29,7 @@ public class MiniVM {
 	public static void main(String[] args) throws IOException {
 		Path input = args.length > 0
 			? Paths.get(args[0])
-			: Paths.get("input.src");
+			: Paths.get("src/test_o.bin");
 
 		new MiniVM(input).execute(true, true);
 	}
@@ -278,7 +278,8 @@ class Instr {
 	}
 
 	public InstrType instructionType() {
-		return InstrType.values()[raw >>> TYPE_SHIFT];
+		int ind = raw >>> TYPE_SHIFT;
+		return InstrType.values()[ind];
 	}
 
 	public MemoryMode memoryMode() {

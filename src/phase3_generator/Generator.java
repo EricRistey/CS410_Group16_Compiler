@@ -446,6 +446,37 @@ public class Generator {
         pc+=1;
     }
 
+    private byte[] makeInstruction(int op, int cmp, int reg, int mem){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //OP CODE
+        //ensure the op code is 4bits
+        if (op > 15) {
+            System.out.println("Op code out of range");
+            System.exit(-1);
+        }
+        //ensure the cmp is a 0 + 3 bit number
+        if (cmp > 6) {
+            System.out.println("CMP out of range");
+            System.exit(-1);
+        }
+
+        //ensure the memory address is a 20 bit number
+        if (mem > 1048575) {
+            System.out.println("memory address out of range");
+            System.exit(-1);
+        }
+
+        stream.write((byte)op);
+        //CMP
+        stream.write((byte)cmp);
+        //REGISTER
+        stream.write((byte)reg);
+        //MEMORY ADDRESS
+        writeAddress(stream, mem);
+
+        return stream.toByteArray();
+    }
+
     private void arithmeticInstruction(int op, String[] split){
         //System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
 
@@ -684,14 +715,14 @@ public class Generator {
         //load store optimization
         //remove redundant load and store instructions
 
+        int num_removed = 1;
+
         System.out.println("Optimizing...");
 
         byte[] prevMem = new byte[5];
         byte prevReg = 0;
 
         for (int i = 0; i < result.length; i++) {
-
-            boolean line_is_jump = false;
 
             if(result[i] == null){
                 continue;
@@ -716,6 +747,8 @@ public class Generator {
                     result[i-1] = null;
                     //remove the current load instruction
                     result[i] = null;
+
+                    num_removed+=2;
                 }
             }
 
@@ -725,6 +758,8 @@ public class Generator {
                     result[i-1] = null;
                     //remove the current store instruction
                     result[i] = null;
+
+                    num_removed+=2;
                 }
             }
 
@@ -735,6 +770,8 @@ public class Generator {
                     if (lit_map.get(mem_int) == 0) {
                         //remove the current instruction
                         result[i] = null;
+
+                        num_removed+=1;
                     }
                 }
             }
@@ -745,8 +782,29 @@ public class Generator {
                     if (lit_map.get(mem_int) == 1) {
                         //remove the current instruction
                         result[i] = null;
+
+                        num_removed+=1;
                     }
                 }
+            }
+
+            if (op == 5) {//JMP            
+                //adjust the address in the jump instruction
+                //adjust the label table
+
+                System.out.println("FIXING JUMP INSTRUCTION: " + i);
+
+                //find the label table entry that matches the memory address
+                for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
+                    if(entry.getValue() == mem_int) {
+                        //adjust the memory address
+                        label_map.put(entry.getKey(), i-num_removed);
+                        break;
+                    }
+                }
+
+                //overwrite the jump instruction with the new memory address
+                result[i] = makeInstruction(op, cmp, reg, i-num_removed);
             }
 
             prevReg = reg;
@@ -755,7 +813,16 @@ public class Generator {
         }
 
         result = removeNulls(result);
-        
+
+        //Print new label table
+        System.out.println("\nLabel Table (POST-OPTIMIZATION): ");
+        System.out.println("----------------------------------------------");
+        for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
+            System.out.print(entry.getKey() + ": ");
+            System.out.printf("%05d\n", entry.getValue());
+        }
+        System.out.println("----------------------------------------------");
+        System.out.println();
     }
         
     private byte[][] removeNulls(byte[][] result2) {
@@ -827,7 +894,7 @@ public class Generator {
         pc = 1;   //reset pc to 100
 
         //Print label table
-        System.out.println("\nLabel Table: ");
+        System.out.println("\nLabel Table (PRE-OPTIMIZATION): ");
         System.out.println("----------------------------------------------");
         for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
             System.out.print(entry.getKey() + ": ");
