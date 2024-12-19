@@ -53,6 +53,9 @@ public class Parse{
     }
 
     public List<String> getAtoms() {
+        if(optimize)
+            optimizeAtoms();
+
         return decafAtoms;
     }
 
@@ -1022,4 +1025,75 @@ public class Parse{
         }
         return "REJECT";
     }
+
+    private void optimizeAtoms(){
+
+        List<String> optimizedAtoms = new ArrayList<>(decafAtoms);
+
+        System.out.println("Optimizing...");
+        int indexCounter = 0;
+        for(String atom: decafAtoms){
+            atom = atom.replace("(", "").replace(")", "");
+            String [] split = atom.split(",");
+
+            for(int j = 0; j < split.length; j++) {
+                split[j] = split[j].trim();
+            }
+
+            
+            if(split[0].equals("MOV")){
+                optimizedAtoms.set(indexCounter-1, decafAtoms.get(indexCounter-1).replace("(", "").replace(")", ""));
+                String [] splitPrevious = optimizedAtoms.get(indexCounter-1).split(",");
+
+                for(int j = 0; j < splitPrevious.length; j++) {
+                    splitPrevious[j] = splitPrevious[j].trim();
+                }
+                
+                if(splitPrevious[0].equals("ADD")||splitPrevious[0].equals("SUB")||splitPrevious[0].equals("MUL")||splitPrevious[0].equals("DIV")){
+
+                    if((splitPrevious[1].matches("-?\\d+") || splitPrevious[1].matches("-?\\d*(\\.\\d+)?")) && (splitPrevious[2].matches("-?\\d+")|| splitPrevious[2].matches("-?\\d*(\\.\\d+)?"))){
+
+                        float a = Float.parseFloat(splitPrevious[1]);
+                        float b = Float.parseFloat(splitPrevious[2]);
+                        float result;
+
+                        switch (splitPrevious[0]){
+                            case "ADD": 
+                                result = a + b;
+                                break;
+                            case "SUB":
+                                result = a - b;
+                                 break;
+                            case "MUL":
+                                result = a * b;
+                                break;
+                            case "DIV":
+                                result = a/b;
+                                break; 
+                            default:
+                                result = 0;
+                                break;
+                        }
+                        
+                        split[3] = result+"";
+                        
+                        //Build the MOV atom back
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("(");
+                        
+                        sb.append(split[0]+", "+split[1]+", "+split[2]+", "+split[3]);
+                        
+                        sb.append(")");
+                        
+                        optimizedAtoms.set(indexCounter, sb.toString());
+                        optimizedAtoms.remove(indexCounter-1);
+                    }
+                }
+            }
+
+            indexCounter++;
+        }
+        decafAtoms = optimizedAtoms;
+    }
+
 }

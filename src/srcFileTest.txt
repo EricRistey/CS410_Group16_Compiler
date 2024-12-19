@@ -1,4 +1,4 @@
-int num = 3;
+int num = 3.5 + 10;
 if((num) > (1-0)){
     result = 1;
 }
