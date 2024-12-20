@@ -432,12 +432,16 @@ public class Generator {
     }
 
     private void writeStoreInstruction(int r, String name){
+        System.out.println("NAME: " + name);
+        ///NEED TO UPDATE LITERLS TABLE
 
         //Check to see if variable exists. If so, save STO register to existing variable. If not, create new variable and STO.
         if (address_map.containsKey(name)) {
+            System.out.println("CONTAINS NAME");
             writeInstruction(8, 0, r, address_map.get(name));
         }
         else{ 
+            System.out.println("NO NAME");
             address_map.put(name, variableCounter);
             variableCounter+=1;
             writeInstruction(8, 0, r, variableCounter-1);
@@ -471,7 +475,7 @@ public class Generator {
             //System.out.println("CONST\nLitCount: " + litCount + " VAL: " + val + " Atom: " + s);
 
             //Check to see if literal already contains address
-            if(!lit_map.containsValue(val)){
+            if(!lit_map.containsValue(litCount)){
                 lit_map.put(litCount++, val);
             }
             //variableCounter+=1;
@@ -564,7 +568,8 @@ public class Generator {
     }
 
     private void arithmeticInstruction(int op, String[] split){
-        //System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
+        System.out.println("SPLIT");
+        System.out.println(split[0] + " " + split[1] + " " + split[2] + " " + split[3]);
 
         int reg1 = ++registerCounter;   //register for a
 
@@ -612,6 +617,7 @@ public class Generator {
                 break;
         }
 
+        
         //STORE
         writeStoreInstruction(registerCounter, split[3]);
 

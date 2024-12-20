@@ -50,6 +50,7 @@ public class RunFront {
         //Send tokens to Scanner
         Parse parser = new Parse(tokens.states, tokens.states_string, tokens.length, optimize);
         System.out.println(parser.Statement());
+        parser.printAtoms();
 
         //Generate file containing atoms
         FileWriter writer = new FileWriter(atomsFile);

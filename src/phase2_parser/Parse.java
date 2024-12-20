@@ -595,6 +595,12 @@ public class Parse{
             return "REJECT";
         } //;
 
+        //grab input for i = 1 + 1;
+        //String[] input = new String[];
+        //while(!tokens[index].equals(")")){
+        //    System.out.println("TOKEN: " + tokens[index]);
+        //}
+
         res = Assignment();     //ex: i = i + 1
         if(expect(19) == -1 || res.equals("REJECT")){
             return "REJECT";
@@ -611,6 +617,27 @@ public class Parse{
         if(expect(17) == -1){
             return "REJECT";
         }  //}
+
+        //Move add and Mov to the end of the atoms list
+        int trackIndex = decafAtoms.size()-1;
+        System.out.println("LABEL NUMEBER: " + lblNumber);
+        while(trackIndex >= 1){
+            if(decafAtoms.get(trackIndex).contains("TST") && decafAtoms.get(trackIndex).contains("L"+(lblNumber+1))){
+                //Found, Move to end
+                System.out.println("ATOM: " + decafAtoms.get(trackIndex+1));
+                System.out.println("ATOM: " + decafAtoms.get(trackIndex+2));
+                if(decafAtoms.get(trackIndex+1).contains("ADD") && decafAtoms.get(trackIndex+2).contains("MOV")){
+                    System.out.println("MOVING___");
+                    String add = decafAtoms.remove(trackIndex+1);
+                    String mov = decafAtoms.remove(trackIndex+1);
+                    decafAtoms.add(add);
+                    decafAtoms.add(mov);
+                }               
+                
+                
+            }
+            trackIndex--;
+        }
 
         //Add decaf
         createJMP(lblNumber);
