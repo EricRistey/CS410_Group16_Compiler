@@ -681,6 +681,10 @@ public class Generator {
                     break;
                 case "JMP":
 
+                    //write an always true comparison before the jump
+
+                    writeInstruction(6, 0, 0, 0);
+
                     int op = 5;
                     int cmp = 0;
                     int reg = 0;
@@ -1002,7 +1006,7 @@ public class Generator {
             }
             else if(atoms.get(i).contains("JMP")) {
                 pc+=1;
-                size+=1;
+                size+=2;
             } 
         }
 
