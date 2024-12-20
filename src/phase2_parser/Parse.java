@@ -620,7 +620,7 @@ public class Parse{
 
         //Move add and Mov to the end of the atoms list
         int trackIndex = decafAtoms.size()-1;
-        System.out.println("LABEL NUMEBER: " + lblNumber);
+        System.out.println("LABEL NUMBER: " + lblNumber);
         while(trackIndex >= 1){
             if(decafAtoms.get(trackIndex).contains("TST") && decafAtoms.get(trackIndex).contains("L"+(lblNumber+1))){
                 //Found, Move to end
@@ -700,10 +700,11 @@ public class Parse{
         //ELSE-IF CASE
         if(accept(36)){
             //Add decaf
-            createLBL(lblNumber);
             lbl++;
             int lblNumberJMP = lbl;
             createJMP(lblNumberJMP);
+            createLBL(lblNumber);
+            
             if(ElseIf().equals("REJECT")){
                 return "REJECT";
             }
@@ -712,10 +713,11 @@ public class Parse{
         //ELSE CASE
         else if(accept(35)){
             //Add decaf
-            createLBL(lblNumber);
             lbl++;
             int lblNumberJMP = lbl;
             createJMP(lblNumberJMP);
+            createLBL(lblNumber);
+            
             if(Else().equals("REJECT")){
                 return "REJECT";
             }
@@ -806,9 +808,6 @@ public class Parse{
         lbl++;
         int lblNumberJMP = lbl;
         createJMP(lblNumberJMP);
-
-        //Add decaf
-        //System.out.println(lbl);
         createLBL(lblNumber);
         
         //ELSE-IF CASE
