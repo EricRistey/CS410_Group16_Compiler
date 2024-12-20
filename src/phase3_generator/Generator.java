@@ -3,6 +3,8 @@ package phase3_generator;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,12 +122,95 @@ public class Generator {
                 //op & cmp
                 byte[] res = new byte[4];
                 res[0] = (byte) ((result1[0] & 0x0F) << 4 | (result1[1] & 0x0F));
+
+                //combine memory
+                byte[] mem = new byte[5];
+                String num = "";
+                for (int i = 0; i < 5; i++) {
+                    String binary = "";
+                    int number = result1[i + 3] & 0xFF;
+                    System.out.println("K: " + number);
+                    num = num + number;
+                }
+
+                int number = Integer.parseInt(num, 10);
+                System.out.println("NUMBER: " + number);
+
+                //Now we have the entire number.
+                //convert int to hex representation
+                
+                BigInteger bigInt = BigInteger.valueOf(number);
+                byte[] bytes = bigInt.toByteArray();
+                int count = 5;//determine leading zeros
+                for (byte b : bytes) {
+                    System.out.println(String.format("%s", b));
+                    System.out.println(String.format("%x ", b));
+
+                    int unsignedByte = b & 0xFF;//get unsigned byte to determine leading zeros
+                    if(unsignedByte > 0xF){
+                        //there is two hexadecimal numbers
+                        count -= 2;
+                    } else {
+                        //there is one hexadecimal number
+                        count -= 1;
+                    }
+                }
+
+                if(count <= 0){
+                    //register and 4 of memory
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4 | (bytes[0] << 4 & 0xF0));
+                    //5th and 6th
+                    res[2] = (byte) (bytes[1]);
+                    //7th and 8th
+                    res[3] = (byte) (bytes[2]);
+                }
+                else if(count == 1){
+                    //register and 4 of memory
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4);
+                    //5th and 6th
+                    res[2] = (byte) (bytes[0]);
+                    //7th and 8th
+                    res[3] = (byte) (bytes[1]);
+                }
+                else if(count == 2){
+                    //register and 4 of memory
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4);
+                    //5th and 6th
+                    res[2] = (byte) (bytes[0]);
+                    //7th and 8th
+                    res[3] = (byte) (bytes[1]);
+                }
+                else if(count == 3){
+                    //register and 4 of memory
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4);
+                    //5th and 6th
+                    res[2] = (byte) (0x00);
+                    //7th and 8th
+                    res[3] = (byte) (bytes[0]);
+                }
+                else if(count == 4){
+                    //register and 4 of memory
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4);
+                    //5th and 6th
+                    res[2] = (byte) (0x00);
+                    //7th and 8th
+                    res[3] = (byte) (bytes[0]);
+                }
+                
+                //System.out.println("COUNT: " + count);
+                    //mem[i] = (byte) (number & 0xFF);                
+
+                //System.out.println("BYTES: " + Arrays.toString(bytes));
+
+                //System.out.println("MEM: " + Arrays.toString(mem));
+                
+
                 //register and 4 of memory
-                res[1] = (byte) ((result1[2] & 0x0F) << 4 | (result1[3] & 0x0F));
+                //res[1] = (byte) ((result1[2] & 0x0F) << 4 | (result1[3] & 0x0F));
                 //5th and 6th
-                res[2] = (byte) ((result1[4] & 0x0F) << 4 | (result1[5] & 0x0F));
+                //res[2] = (byte) ((result1[4] & 0x0F) << 4 | (result1[5] & 0x0F));
                 //7th and 8th
-                res[3] = (byte) ((result1[6] & 0x0F) << 4 | (result1[7] & 0x0F));
+                //res[3] = (byte) ((result1[6] & 0x0F) << 4 | (result1[7] & 0x0F));
                 
                 fos.write(res);
             }
@@ -133,6 +218,9 @@ public class Generator {
             //Data Section
             for(Map.Entry<Integer, Integer> entry: data.entrySet()){
                 //32 bit integer
+                //BigInteger bigInt = BigInteger.valueOf(entry.getValue());
+                //byte[] bytes = bigInt.toByteArray();
+                
                 fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
                 fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
                 fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
@@ -395,13 +483,13 @@ public class Generator {
         else{
             if (address_map.containsKey(s)) {
                 int addr = address_map.get(s);
-                lit_map.put(addr, -1);
+                lit_map.put(addr, 0);
                 //System.out.println("inADDRMAP \nLitCount: " + 0 + " VAL: " + addr + " Atom: " + s);
                 return addr;
             }
             else{   //if the value is not a constant (variable) and not in the address table, reserve a memory address for it containing 0
                 //System.out.println("LitCount: " + litCount + " VAL: " + 0 + " Atom: " + s);
-                lit_map.put(litCount++, -1);    //if the value is not a constant (variable), reserve a memory address for it containing 0
+                lit_map.put(litCount++, 0);    //if the value is not a constant (variable), reserve a memory address for it containing 0
                 //variableCounter+=1;
             }
         }

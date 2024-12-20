@@ -138,8 +138,8 @@ public class MiniVM {
 				fpreg[ir.r1()] = fpreg[ir.r1()] / Float.intBitsToFloat(mem[dest]);
 			}
 			case JMP -> {
-				System.out.println("Jumping to " + ir.address());
 				if (flag) {
+					System.out.println("Jumping to " + ir.address());
 					reg[PC_REGISTER] = absMemoryLocation(ir);
 				}
 			}
@@ -155,6 +155,7 @@ public class MiniVM {
 					case GREATER_OR_EQUAL -> fpreg[ir.r1()] >= rhs;
 					case UNEQUAL -> fpreg[ir.r1()] != rhs;
 				};
+				System.out.println("FLAG: " + flag);
 			}
 			case LOD -> {
 				System.out.println("Loading " + ir.r1());
