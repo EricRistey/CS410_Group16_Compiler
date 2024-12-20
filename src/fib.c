@@ -1,8 +1,6 @@
 int a = 0;
 int b = 1;
 
-for (int i = 0; i == 0; i = i+1) {
-    int c = a + b;
-    a = b;
-    b = c;
+for (int i = 0; i == 1; i = i+1) {
+    
 }

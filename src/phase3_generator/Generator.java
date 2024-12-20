@@ -438,6 +438,7 @@ public class Generator {
         //Check to see if variable exists. If so, save STO register to existing variable. If not, create new variable and STO.
         if (address_map.containsKey(name)) {
             System.out.println("CONTAINS NAME");
+            //if(lit_map.containsKey())
             writeInstruction(8, 0, r, address_map.get(name));
         }
         else{ 
@@ -475,7 +476,7 @@ public class Generator {
             //System.out.println("CONST\nLitCount: " + litCount + " VAL: " + val + " Atom: " + s);
 
             //Check to see if literal already contains address
-            if(!lit_map.containsValue(litCount)){
+            if(!lit_map.containsValue(val)){
                 lit_map.put(litCount++, val);
             }
             //variableCounter+=1;
