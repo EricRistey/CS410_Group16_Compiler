@@ -70,6 +70,8 @@ public class MiniVM {
 
 				dumpRegisters();
 				dumpMemory(0, load);
+				dumpMemory(2000, 2010);
+				dumpMemory(1000, 1010);
 			}
 
 			for (cycle = 0; cycle < MAX_CYCLES; cycle++) {
@@ -93,6 +95,10 @@ public class MiniVM {
 					dumpTrace(3, 7);
 					dumpRegisters();
 					dumpMemory(0, load);
+					dumpMemory(2000, 2010);
+					dumpMemory(1000, 1010);
+
+
 				}
 
 				if (halt) break;
