@@ -3,8 +3,11 @@ package phase3_generator;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +93,7 @@ public class Generator {
         this.pc = 1;
         this.registerCounter = 0;
         this.instructionCounter = 0;
-        this.variableCounter = 2000;
-        this.litCount = 1000;
+
 
         this.optimize = optimize;
 
@@ -103,6 +105,9 @@ public class Generator {
         int size = createLabelTable(atoms);
         //+1 accounts for the HLT instruction
         result = new byte[size+1][8];
+
+        this.variableCounter = (size+2)*2;
+        this.litCount = size+2;
 
     }
 
@@ -211,19 +216,37 @@ public class Generator {
             }
 
             //Data Section
-            for(Map.Entry<Integer, Integer> entry: data.entrySet()){
+            ArrayList<Integer> keys = new ArrayList<>(data.keySet());
+            Collections.sort(keys);
+            
+            for (int key_addr: keys) {
                 //32 bit integer
-                BigInteger bigInt = BigInteger.valueOf(entry.getValue());
-                byte[] bytes = bigInt.toByteArray();
+                BigInteger bigInt = BigInteger.valueOf(data.get(key_addr));   //literal value
+                byte[] bytes = bigInt.toByteArray();    //literal value in bytes
 
-                byte[] padding = new byte[4];
-                System.arraycopy(bytes, 0, padding, 4-bytes.length, bytes.length);
+                byte[] padding = new byte[4];   //padding to 4 bytes
+                System.arraycopy(bytes, 0, padding, 4-bytes.length, bytes.length); 
                 fos.write(padding);
                 //fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
                 //fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
                 //fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
                 //fos.write(entry.getValue().byteValue() & 0xFF);
             }
+
+            // for(Map.Entry<Integer, Integer> entry: data.entrySet()){        //map: address -> value
+            //     //32 bit integer
+            //     BigInteger bigInt = BigInteger.valueOf(entry.getValue());   //literal value
+            //     byte[] bytes = bigInt.toByteArray();    //literal value in bytes
+
+            //     byte[] padding = new byte[4];   //padding to 4 bytes
+            //     System.arraycopy(bytes, 0, padding, 4-bytes.length, bytes.length); 
+            //     fos.write(padding);
+            //     //fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
+            //     //fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
+            //     //fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
+            //     //fos.write(entry.getValue().byteValue() & 0xFF);
+            // }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -473,6 +496,9 @@ public class Generator {
     private int checkConst(String s) {
         if (s.matches("-?\\d+")) {
             int val = Integer.parseInt(s);
+
+            System.out.println("FOUND LITERAL: " + val);
+
             //System.out.println("CONST\nLitCount: " + litCount + " VAL: " + val + " Atom: " + s);
 
             //Check to see if literal already contains address
@@ -486,7 +512,7 @@ public class Generator {
         else{
             if (address_map.containsKey(s)) {
                 int addr = address_map.get(s);
-                lit_map.put(addr, 0);
+                // lit_map.put(addr, 0);
                 //System.out.println("inADDRMAP \nLitCount: " + 0 + " VAL: " + addr + " Atom: " + s);
                 return addr;
             }
@@ -869,6 +895,9 @@ public class Generator {
                         result[i] = null;
 
                         num_removed+=1;
+                        System.out.println("\nREMOVED ADD: " + i + "\n");
+                        System.out.println("MEM_INT: " + mem_int);
+
                     }
                 }
             }
@@ -936,6 +965,15 @@ public class Generator {
                 }
             }
         }
+
+        //shift all address in the literal table back by how many instructions were removed and replace the literal table
+        HashMap<Integer, Integer> newLitMap = new HashMap<>();
+        for (Map.Entry<Integer, Integer> entry : lit_map.entrySet()) {
+            int oldPosition = entry.getKey();
+            int newPosition = oldPosition - num_removed;
+            newLitMap.put(newPosition, entry.getValue());
+        }
+        lit_map = newLitMap;
 
         result = removeNulls(result);
 

@@ -94,9 +94,10 @@ public class MiniVM {
 
 					dumpTrace(3, 7);
 					dumpRegisters();
-					dumpMemory(0, load);
-					dumpMemory(2000, 2010);
-					dumpMemory(1000, 1010);
+					// dumpMemory(0, load);
+					dumpMemory(10, 35);
+					// dumpMemory(5, 10);
+					dumpMemory(50, 65);
 
 
 				}
