@@ -218,13 +218,16 @@ public class Generator {
             //Data Section
             for(Map.Entry<Integer, Integer> entry: data.entrySet()){
                 //32 bit integer
-                //BigInteger bigInt = BigInteger.valueOf(entry.getValue());
-                //byte[] bytes = bigInt.toByteArray();
-                
-                fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
-                fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
-                fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
-                fos.write(entry.getValue().byteValue() & 0xFF);
+                BigInteger bigInt = BigInteger.valueOf(entry.getValue());
+                byte[] bytes = bigInt.toByteArray();
+
+                byte[] padding = new byte[4];
+                System.arraycopy(bytes, 0, padding, 4-bytes.length, bytes.length);
+                fos.write(padding);
+                //fos.write((entry.getValue().byteValue() >> 24) & 0xFF);
+                //fos.write((entry.getValue().byteValue() >> 16) & 0xFF);
+                //fos.write((entry.getValue().byteValue() >> 8) & 0xFF);
+                //fos.write(entry.getValue().byteValue() & 0xFF);
             }
         } catch (IOException e) {
             e.printStackTrace();
