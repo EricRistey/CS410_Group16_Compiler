@@ -1,5 +1,4 @@
-(ADD, 3.5, 10, t0)
-(MOV, t0, , num)
+(MOV, 13.5, , num)
 (SUB, 1, 0, t1)
 (TST, num, t1, , 4, L0)
 (MOV, 1, , result)
