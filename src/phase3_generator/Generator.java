@@ -129,12 +129,10 @@ public class Generator {
                 for (int i = 0; i < 5; i++) {
                     String binary = "";
                     int number = result1[i + 3] & 0xFF;
-                    System.out.println("K: " + number);
                     num = num + number;
                 }
 
                 int number = Integer.parseInt(num, 10);
-                System.out.println("NUMBER: " + number);
 
                 //Now we have the entire number.
                 //convert int to hex representation
@@ -143,9 +141,6 @@ public class Generator {
                 byte[] bytes = bigInt.toByteArray();
                 int count = 5;//determine leading zeros
                 for (byte b : bytes) {
-                    System.out.println(String.format("%s", b));
-                    System.out.println(String.format("%x ", b));
-
                     int unsignedByte = b & 0xFF;//get unsigned byte to determine leading zeros
                     if(unsignedByte > 0xF){
                         //there is two hexadecimal numbers
@@ -158,7 +153,7 @@ public class Generator {
 
                 if(count <= 0){
                     //register and 4 of memory
-                    res[1] = (byte) ((result1[2] & 0x0F) << 4 | (bytes[0] << 4 & 0xF0));
+                    res[1] = (byte) ((result1[2] & 0x0F) << 4 | (bytes[0] << 4 & 0x0F));//CHanged
                     //5th and 6th
                     res[2] = (byte) (bytes[1]);
                     //7th and 8th
@@ -790,7 +785,7 @@ public class Generator {
 
         //Halt
         writeInstruction(9, 0, 0, 0);
-
+        System.out.println("OPTIMIZE: " + optimize);
         if (optimize) {
             localOptimization();
         }
@@ -879,10 +874,11 @@ public class Generator {
                 }
             }
 
-            if (op == 5) {//JMP            
+            if (op == 5) {//JMP 
+                continue;           
                 //adjust the address in the jump instruction
                 //adjust the label table
-
+                /*
                 System.out.println("FIXING JUMP INSTRUCTION: " + i);
 
                 //find the label table entry that matches the memory address
@@ -896,6 +892,7 @@ public class Generator {
 
                 //overwrite the jump instruction with the new memory address
                 result[i] = makeInstruction(op, cmp, reg, i-num_removed);
+                */
             }
 
             prevReg = reg;
