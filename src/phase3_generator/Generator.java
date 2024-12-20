@@ -801,7 +801,7 @@ public class Generator {
         //load store optimization
         //remove redundant load and store instructions
 
-        int num_removed = 1;
+        int num_removed = 0;
 
         System.out.println("Optimizing...");
 
@@ -874,30 +874,56 @@ public class Generator {
                 }
             }
 
-            if (op == 5) {//JMP 
-                continue;           
-                //adjust the address in the jump instruction
-                //adjust the label table
-                /*
-                System.out.println("FIXING JUMP INSTRUCTION: " + i);
-
-                //find the label table entry that matches the memory address
-                for(HashMap.Entry<String, Integer> entry : label_map.entrySet()) {
-                    if(entry.getValue() == mem_int) {
-                        //adjust the memory address
-                        label_map.put(entry.getKey(), i-num_removed);
-                        break;
-                    }
-                }
-
-                //overwrite the jump instruction with the new memory address
-                result[i] = makeInstruction(op, cmp, reg, i-num_removed);
-                */
-            }
-
             prevReg = reg;
             prevMem = mem;
 
+        }
+
+        // result = removeNulls(result);
+        // createLabelTable(atoms);
+        // Track the original and new positions of instructions
+        Map<Integer, Integer> positionMap = new HashMap<>();
+        int newIndex = 0;
+        for (int oldIndex = 0; oldIndex < result.length; oldIndex++) {
+            if (result[oldIndex] != null) {
+                positionMap.put(oldIndex, newIndex);
+                newIndex++;
+            }
+        }
+
+        // Update the label table based on the new positions
+        for (Map.Entry<String, Integer> entry : label_map.entrySet()) {
+            int oldPosition = entry.getValue();
+            if (positionMap.containsKey(oldPosition)) {
+                label_map.put(entry.getKey(), positionMap.get(oldPosition));
+            }
+        }
+
+        // Adjust the jump instructions to point to the correct new positions
+        for (int i = 0; i < result.length; i++) {
+            if (result[i] == null) {
+                continue;
+            }
+
+            byte[] bytes = result[i];
+            byte op = bytes[0];
+            byte cmp = bytes[1];
+            byte reg = bytes[2];
+            byte[] mem = new byte[5];
+
+            for (int j = 0; j < 5; j++) {
+                mem[j] = bytes[j + 3];
+            }
+            
+            int mem_int = readAddress(mem);
+
+            if (op == 5) { // JMP
+                int oldTarget = mem_int;
+                if (positionMap.containsKey(oldTarget)) {
+                    int newTarget = positionMap.get(oldTarget);
+                    result[i] = makeInstruction(op, cmp, reg, newTarget);
+                }
+            }
         }
 
         result = removeNulls(result);
@@ -928,6 +954,7 @@ public class Generator {
         count = 0;
         for (int i = 0; i < result2.length; i++) {
             if (result2[i] != null) {
+                System.out.println(result2[i]);
                 result3[count] = result2[i];
                 count++;
             }

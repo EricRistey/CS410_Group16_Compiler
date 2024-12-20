@@ -1042,7 +1042,7 @@ public class Parse{
             }
 
             
-            if(split[0].equals("MOV")){
+            if(split[0].equals("MOV") && indexCounter > 1){
                 //ONLY FOR ADD, SUB, MUL, DIV
                 if(decafAtoms.get(indexCounter-1).contains("MOV") || decafAtoms.get(indexCounter-1).contains("JMP") || decafAtoms.get(indexCounter-1).contains("LBL") || decafAtoms.get(indexCounter-1).contains("TST"))
                     continue;
