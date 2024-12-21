@@ -64,9 +64,9 @@ public class Scan {
 
     public TokenContainer tokenize(String input){
 
-        System.out.println("_________________________________________________________________");
-        System.out.println("Scanning");
-        System.out.println("_________________________________________________________________");
+        //System.out.println("_________________________________________________________________");
+        //System.out.println("Scanning");
+        //System.out.println("_________________________________________________________________");
 
         //States list will contain all final states that the state machine reaches
         int states[] = new int[200];
@@ -291,7 +291,7 @@ public class Scan {
                 } finally {
                     br.close();
                 }
-                System.out.println("FILE CONTENTS:\n" + fileContents.toString());
+                //System.out.println("FILE CONTENTS:\n" + fileContents.toString());
                 return fileContents.toString();
             }
         }
@@ -330,7 +330,7 @@ public class Scan {
                     } finally {
                         br.close();
                     }
-                    System.out.println("FILE CONTENTS:\n" + fileContents.toString());
+                    //System.out.println("FILE CONTENTS:\n" + fileContents.toString());
                     file.close();
                     return fileContents.toString();
                 }
