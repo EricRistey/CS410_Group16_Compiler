@@ -12,6 +12,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*************************************************************
+ * Group 16 - Generator
+ * 
+ * Authors: 
+ *      Andrew DeGarmo, Like Hare, Greyson Meares
+ * Reviewers: 
+ *      Quinn McAuliffe, Eric Ristey, Michael Ames
+ * 
+ * CS410 - Compiler Construction
+ * 12/1/2024
+ * 
+ * Functionality:
+ *      Generates machine code from a List<String> of atoms
+ * 
+ ************************************************************/
+
 public class Generator {
     /*
      * Absolute Code

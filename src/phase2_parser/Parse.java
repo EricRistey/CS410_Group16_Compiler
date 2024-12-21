@@ -1057,7 +1057,6 @@ public class Parse{
         List<String> optimizedAtoms = new ArrayList<>(decafAtoms);
 
         System.out.println("Optimizing...\n");
-        printAtoms(decafAtoms);
         int indexCounter = 0;
         for(String atom: decafAtoms){
             atom = atom.replace("(", "").replace(")", "");
@@ -1066,15 +1065,16 @@ public class Parse{
             for(int j = 0; j < split.length; j++) {
                 split[j] = split[j].trim();
             }
-
             
-            if(split[0].equals("MOV") && indexCounter > 1){
+            if(split[0].equals("MOV") && indexCounter >= 1){
                 //ONLY FOR ADD, SUB, MUL, DIV
-                if(decafAtoms.get(indexCounter-1).contains("MOV") || decafAtoms.get(indexCounter-1).contains("JMP") || decafAtoms.get(indexCounter-1).contains("LBL") || decafAtoms.get(indexCounter-1).contains("TST"))
+                if(decafAtoms.get(indexCounter-1).contains("MOV") || decafAtoms.get(indexCounter-1).contains("JMP") || decafAtoms.get(indexCounter-1).contains("LBL") || decafAtoms.get(indexCounter-1).contains("TST")){
+                    indexCounter++;
                     continue;
+                }
+                    
                 optimizedAtoms.set(indexCounter-1, decafAtoms.get(indexCounter-1).replace("(", "").replace(")", ""));
                 String [] splitPrevious = optimizedAtoms.get(indexCounter-1).split(",");
-
                 for(int j = 0; j < splitPrevious.length; j++) {
                     splitPrevious[j] = splitPrevious[j].trim();
                 }
@@ -1082,7 +1082,6 @@ public class Parse{
                 if(splitPrevious[0].equals("ADD")||splitPrevious[0].equals("SUB")||splitPrevious[0].equals("MUL")||splitPrevious[0].equals("DIV")){
 
                     if((splitPrevious[1].matches("-?\\d+") || splitPrevious[1].matches("-?\\d*(\\.\\d+)?")) && (splitPrevious[2].matches("-?\\d+")|| splitPrevious[2].matches("-?\\d*(\\.\\d+)?"))){
-
                         float a = Float.parseFloat(splitPrevious[1]);
                         float b = Float.parseFloat(splitPrevious[2]);
                         float result;
@@ -1111,7 +1110,7 @@ public class Parse{
                         StringBuilder sb = new StringBuilder();
                         sb.append("(");
                         
-                        sb.append(split[0]).append(", ").append(split[1]).append(", ").append(split[2]).append(", ").append(split[3]);
+                        sb.append(split[0]+", "+split[1]+", "+split[2]+", "+split[3]);
                         
                         sb.append(")");
                         String s = sb.toString();
@@ -1123,7 +1122,7 @@ public class Parse{
                         StringBuilder sb = new StringBuilder();
                         sb.append("(");
                         
-                        sb.append(split[0]).append(", ").append(split[1]).append(", ").append(split[2]).append(", ").append(split[3]);
+                        sb.append(split[0]+", "+split[1]+", "+split[2]+", "+split[3]);
                         
                         sb.append(")");
                         String s = sb.toString();

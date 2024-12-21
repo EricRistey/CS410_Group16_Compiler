@@ -18,11 +18,11 @@ public class RunFront {
 
         String srcFile = args[0];
         String atomsFile = args[1];
-        System.out.println(".atom file: " + atomsFile);
+        //System.out.println(".atom file: " + atomsFile);
         
         if(args.length == 3) {
             String opFlag = args[2].toLowerCase();
-            System.out.println("OPFLAG: " + opFlag);
+            //System.out.println("OPFLAG: " + opFlag);
             switch (opFlag) {
                 case "-o" -> optimize = false;
                 case "+o" -> optimize = true;
