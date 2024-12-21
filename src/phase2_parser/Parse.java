@@ -1058,7 +1058,13 @@ public class Parse{
 
         System.out.println("Optimizing...\n");
         int indexCounter = 0;
+        String prevAtom = "";
         for(String atom: decafAtoms){
+            if(decafAtoms.get(indexCounter).contains("JMP") || decafAtoms.get(indexCounter).contains("LBL") || decafAtoms.get(indexCounter).contains("TST")){
+                indexCounter++;
+                continue;
+            }
+            System.out.println("ATOM: " + atom);
             atom = atom.replace("(", "").replace(")", "");
             String [] split = atom.split(",");
 
@@ -1073,8 +1079,9 @@ public class Parse{
                     continue;
                 }
                     
-                optimizedAtoms.set(indexCounter-1, decafAtoms.get(indexCounter-1).replace("(", "").replace(")", ""));
-                String [] splitPrevious = optimizedAtoms.get(indexCounter-1).split(",");
+                //optimizedAtoms.set(indexCounter-1, decafAtoms.get(indexCounter-1).replace("(", "").replace(")", ""));
+                //String [] splitPrevious = optimizedAtoms.get(indexCounter-1).split(",");
+                String[] splitPrevious = prevAtom.split(", ");
                 for(int j = 0; j < splitPrevious.length; j++) {
                     splitPrevious[j] = splitPrevious[j].trim();
                 }
@@ -1119,6 +1126,7 @@ public class Parse{
                         
                     } else {
                         //REBUILD ATOM
+                        
                         StringBuilder sb = new StringBuilder();
                         sb.append("(");
                         
@@ -1129,8 +1137,19 @@ public class Parse{
                         optimizedAtoms.set(indexCounter, s);
                     }
                 }
+            } else{
+                //REBUILD ATOM
+                StringBuilder sb = new StringBuilder();
+                sb.append("(");
+                
+                sb.append(split[0]+", "+split[1]+", "+split[2]+", "+split[3]);
+                
+                sb.append(")");
+                System.out.println("Atom: " + sb.toString());
+                String s = sb.toString();
+                optimizedAtoms.set(indexCounter, s);
             }
-
+            prevAtom = atom;
             indexCounter++;
         }
         decafAtoms = optimizedAtoms;
